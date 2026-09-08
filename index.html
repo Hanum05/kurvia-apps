@@ -14,7 +14,7 @@
                             50: '#fff1f2',
                             100: '#ffe4e6',
                             500: '#f43f5e',
-                            600: '#e11d48', // Merah pink yang Anda minta
+                            600: '#e11d48',
                             700: '#be123c',
                             900: '#881337',
                         },
@@ -52,6 +52,15 @@
             100% { transform: translateY(100%); }
         }
         .animate-scan { animation: scanline 3s linear infinite; }
+        
+        /* Chatbot Typing Animation */
+        .typing-dot { animation: typing 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 h-full flex flex-col overflow-hidden selection:bg-kurkumin-100 selection:text-kurkumin-900">
@@ -59,8 +68,8 @@
     <header class="bg-white border-b border-slate-200 shadow-sm z-30 flex-shrink-0">
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="bg-kurkumin-50 p-2.5 rounded-2xl border border-kurkumin-100 flex items-center justify-center">
-                    <i class="fa-solid fa-seedling text-[#e11d48] text-xl"></i>
+                <div class="bg-amber-100 p-2.5 rounded-2xl border border-amber-200 flex items-center justify-center">
+                    <i class="fa-solid fa-seedling text-amber-600 text-xl"></i>
                 </div>
                 <div>
                     <h1 class="font-heading text-lg font-bold tracking-wide flex items-center gap-2 text-slate-800">
@@ -71,11 +80,11 @@
             </div>
 
             <div class="flex items-center space-x-3">
-                <div onclick="switchTab('quest')" class="cursor-pointer bg-amber-50 hover:bg-amber-100 text-amber-700 transition px-3 py-1.5 rounded-full border border-amber-200 flex items-center space-x-2 text-xs font-bold">
+                <div class="cursor-pointer bg-amber-50 hover:bg-amber-100 text-amber-700 transition px-3 py-1.5 rounded-full border border-amber-200 flex items-center space-x-2 text-xs font-bold">
                     <i class="fa-solid fa-coins"></i>
                     <span id="headerPoints">420 Pts</span>
                 </div>
-                <button onclick="showNotificationModal()" class="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition relative">
+                <button onclick="showModal({title:'Notifikasi', desc:'Tidak ada notifikasi baru saat ini.'})" class="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition relative">
                     <i class="fa-solid fa-bell text-sm"></i>
                     <span class="absolute top-1 right-1 w-2 h-2 bg-[#e11d48] rounded-full animate-ping"></span>
                     <span class="absolute top-1 right-1 w-2 h-2 bg-[#e11d48] rounded-full"></span>
@@ -94,56 +103,66 @@
                 <button onclick="toggleMobileMenu()" class="text-slate-400 hover:text-slate-600 bg-slate-100 p-2 rounded-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <nav class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-1.5 text-sm">
+            <nav class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-1.5 text-sm pb-10">
                 <div class="text-[10px] font-bold text-slate-400 px-3 py-2 uppercase tracking-wider">Main Modules</div>
                 <button onclick="switchTab('dashboard')" class="tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition active" data-tab="dashboard">
-                    <i class="fa-solid fa-border-all w-5 text-center"></i>
-                    <span>Overview Utama</span>
+                    <i class="fa-solid fa-border-all w-5 text-center"></i><span>Overview Utama</span>
                 </button>
                 <button onclick="switchTab('inventory')" class="tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition" data-tab="inventory">
-                    <i class="fa-solid fa-boxes-stacked w-5 text-center text-amber-500"></i>
-                    <span>Inventory (FIFO)</span>
+                    <i class="fa-solid fa-boxes-stacked w-5 text-center text-amber-500"></i><span>Inventory (FIFO)</span>
                 </button>
                 <button onclick="switchTab('freshcheck')" class="tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition" data-tab="freshcheck">
-                    <i class="fa-solid fa-camera-viewfinder w-5 text-center text-[#e11d48]"></i>
-                    <span>Live AI Scanner</span>
+                    <i class="fa-solid fa-camera-viewfinder w-5 text-center text-[#e11d48]"></i><span>Live AI Scanner</span>
                 </button>
                 <button onclick="switchTab('indicator')" class="tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition" data-tab="indicator">
-                    <i class="fa-solid fa-chart-simple w-5 text-center text-purple-500"></i>
-                    <span>Zona Spektrum Warna</span>
+                    <i class="fa-solid fa-chart-simple w-5 text-center text-yellow-500"></i><span>Zona Spektrum Warna</span>
                 </button>
                 <button onclick="switchTab('lab')" class="tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition" data-tab="lab">
-                    <i class="fa-solid fa-spray-can w-5 text-center text-kitosan-600"></i>
-                    <span>Kalkulator Spray</span>
+                    <i class="fa-solid fa-spray-can w-5 text-center text-kitosan-600"></i><span>Kalkulator Spray</span>
                 </button>
                 <button onclick="switchTab('rescue')" class="tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition" data-tab="rescue">
-                    <i class="fa-solid fa-leaf w-5 text-center text-emerald-500"></i>
-                    <span>Food Rescue Engine</span>
+                    <i class="fa-solid fa-leaf w-5 text-center text-emerald-500"></i><span>Food Rescue Engine</span>
+                </button>
+
+                <div class="text-[10px] font-bold text-slate-400 px-3 pt-4 pb-2 uppercase tracking-wider mt-2 border-t border-slate-100">Ekosistem KURVIA</div>
+                <button onclick="switchTab('aichat')" class="tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition" data-tab="aichat">
+                    <i class="fa-solid fa-robot w-5 text-center text-indigo-500"></i><span>KURVIA AI</span>
+                </button>
+                <button onclick="switchTab('fruitprofile')" class="tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition" data-tab="fruitprofile">
+                    <i class="fa-solid fa-apple-whole w-5 text-center text-red-500"></i><span>Fruit Profile</span>
+                </button>
+                <button onclick="switchTab('mitra')" class="tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition" data-tab="mitra">
+                    <i class="fa-solid fa-handshake w-5 text-center text-blue-500"></i><span>KURVIA Mitra</span>
+                </button>
+                <button onclick="switchTab('store')" class="tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition" data-tab="store">
+                    <i class="fa-solid fa-store w-5 text-center text-teal-500"></i><span>KURVIA Store</span>
+                </button>
+
+                <div class="text-[10px] font-bold text-slate-400 px-3 pt-4 pb-2 uppercase tracking-wider mt-2 border-t border-slate-100">Layanan</div>
+                <button onclick="switchTab('feedback')" class="tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition" data-tab="feedback">
+                    <i class="fa-solid fa-star w-5 text-center text-amber-400"></i><span>Feedback</span>
+                </button>
+                <button onclick="switchTab('contact')" class="tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition" data-tab="contact">
+                    <i class="fa-solid fa-headset w-5 text-center text-slate-500"></i><span>Contact & Support</span>
                 </button>
             </nav>
-
-            <div class="p-4 border-t border-slate-100 bg-slate-50/50 text-xs text-slate-500 text-center">
-                <p class="font-semibold text-slate-700">KURVIA Live Edition</p>
-                <p class="text-[10px] mt-0.5">Real-time Computer Vision</p>
-            </div>
         </aside>
 
         <!-- MAIN CONTENT -->
-        <main class="flex-1 bg-slate-50 overflow-y-auto custom-scrollbar p-4 md:p-6 lg:p-8 relative w-full">
-            <div class="max-w-6xl mx-auto space-y-6 lg:space-y-8 w-full">
+        <main class="flex-1 bg-slate-50 overflow-y-auto custom-scrollbar p-4 md:p-6 lg:p-8 relative w-full" id="main-content">
+            <div class="max-w-6xl mx-auto space-y-6 lg:space-y-8 w-full pb-10">
 
-                <div id="tab-dashboard" class="tab-content block space-y-6 lg:space-y-8">
+                <div id="tab-dash-dashboard" class="tab-content block space-y-6 lg:space-y-8">
                     <!-- Hero Banner -->
                     <div class="bg-white rounded-3xl p-6 md:p-10 shadow-sm border border-slate-200 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8">
-                        <div class="absolute -right-20 -top-20 w-64 h-64 bg-kurkumin-50 rounded-full blur-3xl pointer-events-none"></div>
+                        <div class="absolute -right-20 -top-20 w-64 h-64 bg-amber-50 rounded-full blur-3xl pointer-events-none"></div>
                         <div class="absolute -left-20 -bottom-20 w-80 h-80 bg-kitosan-50 rounded-full blur-3xl pointer-events-none"></div>
                         
                         <div class="relative z-10 flex-1 space-y-4">
-                            <span class="inline-block bg-kurkumin-50 text-[10px] font-bold px-3 py-1.5 rounded-full border border-kurkumin-200 uppercase tracking-widest text-[#e11d48]">
+                            <span class="inline-block bg-amber-100 text-[10px] font-bold px-3 py-1.5 rounded-full border border-amber-200 uppercase tracking-widest text-amber-700">
                                 Integrated Preservation Platform
                             </span>
                             
-                            <!-- Permintaan Khusus: Warna Teks Spesifik -->
                             <h2 class="text-3xl md:text-4xl font-bold font-heading leading-tight text-[#e11d48]">
                                 KURVIA: Smart Kitosan Spray dan Kurkumin Freshness Sticker
                             </h2>
@@ -163,11 +182,7 @@
                         
                         <!-- Product Image Area -->
                         <div class="relative z-10 w-full lg:w-2/5 flex flex-col items-center justify-center p-2 mt-6 lg:mt-0">
-                            <!-- Gambar Produk menyesuaikan rasio asli dengan object-contain dan h-auto -->
-                            <img src="produk.png" onerror="this.src='https://placehold.co/400x400/ffe4e6/e11d48?text=Produk+KURVIA'" alt="Produk KURVIA" class="w-full h-auto max-h-[300px] md:max-h-[380px] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-700 relative z-20">
-                            
-                            <!-- Aksen lingkaran dibelakang gambar (Opsional) -->
-                            <div class="absolute inset-0 bg-gradient-to-tr from-kurkumin-100/50 to-transparent rounded-full blur-2xl -z-10 scale-75"></div>
+                            <img src="produk.png" onerror="this.src='https://placehold.co/400x400/fffbeb/f59e0b?text=Produk+KURVIA'" alt="Produk KURVIA" class="w-full h-auto max-h-[300px] md:max-h-[380px] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-700 relative z-20">
                         </div>
                     </div>
 
@@ -190,8 +205,20 @@
                             <div class="flex items-baseline gap-2"><span class="text-2xl font-heading font-bold text-amber-500">3</span><span class="text-xs font-medium text-slate-500">Buah</span></div>
                         </div>
                     </div>
+
+                    <!-- Proses Pembuatan Image Section -->
+                    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200 space-y-4">
+                        <h3 class="text-xl font-bold font-heading text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-gears text-slate-400"></i> Proses Pembuatan KURVIA
+                        </h3>
+                        <div class="w-full rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 p-2 flex justify-center items-center">
+                            <!-- Responsive Image implementation preserving aspect ratio -->
+                            <img src="proses pembuatan.png" onerror="this.src='https://placehold.co/1200x600/f1f5f9/94a3b8?text=Proses+Pembuatan+KURVIA'" alt="Proses Pembuatan KURVIA" class="w-full h-auto object-contain max-h-[800px] rounded-xl">
+                        </div>
+                    </div>
                 </div>
 
+                <!-- LIVE SCANNER TAB -->
                 <div id="tab-dash-freshcheck" class="tab-content hidden space-y-6">
                     <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200 space-y-6">
                         <div class="border-b border-slate-100 pb-5">
@@ -204,40 +231,26 @@
                         </div>
 
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                            
                             <!-- CAMERA INPUT UI (Kiri) -->
                             <div class="space-y-4">
                                 <div class="bg-slate-900 rounded-2xl aspect-[4/3] relative overflow-hidden flex flex-col items-center justify-center shadow-lg border-4 border-slate-800">
-                                    
-                                    <!-- Video Element -->
                                     <video id="liveCameraFeed" autoplay playsinline class="absolute inset-0 w-full h-full object-cover"></video>
-                                    
-                                    <!-- Hidden Canvas for processing -->
                                     <canvas id="liveCameraCanvas" class="hidden"></canvas>
-                                    
-                                    <!-- Viewfinder / Focus Area -->
                                     <div class="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
-                                        <!-- Gelapkan area luar -->
                                         <div class="absolute inset-0 shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]"></div>
-                                        <!-- Kotak Fokus Terang -->
                                         <div class="relative w-32 h-32 sm:w-40 sm:h-40 border-2 border-white/80 rounded-xl flex items-center justify-center">
                                             <div class="w-1 h-1 bg-[#e11d48] rounded-full shadow-[0_0_10px_#e11d48]"></div>
-                                            <!-- Garis Sudut -->
                                             <div class="absolute -top-1 -left-1 w-4 h-4 border-t-4 border-l-4 border-white"></div>
                                             <div class="absolute -top-1 -right-1 w-4 h-4 border-t-4 border-r-4 border-white"></div>
                                             <div class="absolute -bottom-1 -left-1 w-4 h-4 border-b-4 border-l-4 border-white"></div>
                                             <div class="absolute -bottom-1 -right-1 w-4 h-4 border-b-4 border-r-4 border-white"></div>
                                         </div>
                                     </div>
-                                    
-                                    <!-- Status Overlay Kamera -->
                                     <div id="camLiveStatus" class="absolute top-4 left-4 z-20 bg-black/60 text-white font-mono text-[10px] px-3 py-1.5 rounded-md backdrop-blur-sm border border-white/20 uppercase shadow-sm">
                                         [ KAMERA OFFLINE ]
                                     </div>
-
                                 </div>
                                 
-                                <!-- Kontrol Kamera (Depan / Belakang) -->
                                 <div class="flex flex-col sm:flex-row gap-3">
                                     <button id="btnCamFront" onclick="startAnalyzerCamera('user')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-3 px-4 rounded-xl transition border border-slate-200 flex justify-center items-center gap-2">
                                         <i class="fa-solid fa-user"></i> Kamera Depan (Selfie)
@@ -251,8 +264,6 @@
 
                             <!-- LIVE ANALYSIS OUTPUT (Kanan) -->
                             <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col h-full space-y-6 relative overflow-hidden">
-                                <div class="absolute -right-10 -top-10 w-32 h-32 bg-white rounded-full blur-2xl pointer-events-none"></div>
-                                
                                 <div class="flex items-center justify-between border-b border-slate-200 pb-3 relative z-10">
                                     <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Real-Time Classification</span>
                                     <span id="aiBadge" class="bg-slate-200 text-slate-500 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">WAITING</span>
@@ -268,16 +279,12 @@
                                     </div>
                                 </div>
 
-                                <!-- Research Metrics extracted from image -->
                                 <div class="grid grid-cols-2 gap-3 text-xs relative z-10">
-                                    <!-- Extracted Color Data -->
                                     <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-2 shadow-sm">
                                         <div class="font-bold text-slate-700 border-b border-slate-100 pb-1 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-eye text-[#e11d48]"></i> Color Metric</div>
                                         <div class="flex justify-between items-center"><span class="text-slate-500">Hue (Warna)</span> <span id="valHue" class="font-mono font-bold text-slate-800">--</span></div>
                                         <div class="flex justify-between items-center"><span class="text-slate-500">RGB Base</span> <span id="valRgb" class="font-mono text-[10px] text-slate-600">--</span></div>
                                     </div>
-                                    
-                                    <!-- Estimated Biological Data -->
                                     <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-2 shadow-sm">
                                         <div class="font-bold text-slate-700 border-b border-slate-100 pb-1 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-microscope text-purple-600"></i> Calibrated Params</div>
                                         <div class="flex justify-between items-center"><span class="text-slate-500">pH Ruang</span> <span id="valPh" class="font-mono font-bold text-slate-800">--</span></div>
@@ -287,7 +294,7 @@
                                 
                                 <div class="mt-auto bg-blue-50/70 p-4 rounded-xl border border-blue-100 text-xs text-blue-900 relative z-10">
                                     <span class="font-bold block mb-1 flex items-center gap-1"><i class="fa-solid fa-lightbulb text-amber-500"></i> Rekomendasi Tindakan:</span>
-                                    <span id="aiRecommendation" class="leading-relaxed block">Pilih kamera untuk mulai membaca indikator warna. Algoritma akan mendeteksi nilai spektrum secara *real-time*.</span>
+                                    <span id="aiRecommendation" class="leading-relaxed block">Pilih kamera untuk mulai membaca indikator warna. Algoritma akan mendeteksi nilai spektrum kurkumin secara *real-time*.</span>
                                 </div>
                                 
                                 <button onclick="stopAnalyzerCamera()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition relative z-10">Hentikan Kamera</button>
@@ -296,58 +303,63 @@
                     </div>
                 </div>
 
+                <!-- INDICATOR TAB (Diperbarui untuk Kurkumin 3 Tahap) -->
                 <div id="tab-dash-indicator" class="tab-content hidden space-y-6">
                     <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200 space-y-8">
                         <div class="border-b border-slate-100 pb-5">
-                            <h2 class="text-2xl font-bold font-heading text-slate-800">Zona Spektrum Indikator (3 Tahap)</h2>
+                            <h2 class="text-2xl font-bold font-heading text-slate-800">Zona Spektrum Indikator Kurkumin — 3 Tahap</h2>
                             <p class="text-sm text-slate-500 mt-1">
-                                Representasi ilmiah perubahan warna indikator kurkumin berdasarkan peningkatan gas etilen dan tingkat pH lingkungan sekitar buah.
+                                Representasi ilmiah perubahan warna stiker indikator kurkumin berdasarkan peningkatan gas etilen dan tingkat pH lingkungan sekitar buah.
                             </p>
                         </div>
 
-                        <!-- 3 ZONES UI -->
+                        <!-- 3 ZONES UI for Kurkumin -->
                         <div class="space-y-4">
-                            <div class="flex h-20 md:h-24 w-full rounded-2xl overflow-hidden shadow-sm border border-slate-200 text-white text-center cursor-pointer">
+                            <div class="flex h-20 md:h-24 w-full rounded-2xl overflow-hidden shadow-sm border border-slate-200 text-center cursor-pointer">
                                 <!-- ZONE 1: FRESH -->
-                                <div onclick="updateZone(1)" id="zone1" class="flex-1 bg-purple-700 flex flex-col justify-center items-center transition-all opacity-100 relative hover:brightness-110">
-                                    <span class="font-bold text-sm md:text-base tracking-wide z-10">🟣 FRESH</span>
-                                    <span class="font-medium text-[10px] md:text-xs text-white/80 mt-0.5 z-10">Merah - Ungu (Hue 260-330)</span>
+                                <div onclick="updateZone(1)" id="zone1" class="flex-1 bg-yellow-400 flex flex-col justify-center items-center transition-all opacity-100 relative hover:brightness-105 border-r border-yellow-500">
+                                    <span class="font-bold text-sm md:text-base tracking-wide text-yellow-900 z-10">🟡 FRESH</span>
+                                    <span class="font-medium text-[10px] md:text-xs text-yellow-800 mt-0.5 z-10">Kuning (Hue ± 45-60°)</span>
                                 </div>
                                 <!-- ZONE 2: CHECK -->
-                                <div onclick="updateZone(2)" id="zone2" class="flex-1 bg-pink-400 flex flex-col justify-center items-center transition-all opacity-40 relative hover:brightness-110">
-                                    <span class="font-bold text-sm md:text-base tracking-wide text-white z-10 shadow-sm">🩷 CHECK</span>
-                                    <span class="font-medium text-[10px] md:text-xs text-white mt-0.5 z-10">Pink Muda (Hue 330-360)</span>
+                                <div onclick="updateZone(2)" id="zone2" class="flex-1 bg-orange-500 flex flex-col justify-center items-center transition-all opacity-40 relative hover:brightness-105 border-r border-orange-600">
+                                    <span class="font-bold text-sm md:text-base tracking-wide text-white z-10 shadow-sm">🟠 CHECK</span>
+                                    <span class="font-medium text-[10px] md:text-xs text-white/90 mt-0.5 z-10">Kuning-Oranye (Hue ± 30-45°)</span>
                                 </div>
                                 <!-- ZONE 3: LESS FRESH -->
-                                <div onclick="updateZone(3)" id="zone3" class="flex-1 bg-lime-400 flex flex-col justify-center items-center transition-all opacity-40 relative hover:brightness-110">
-                                    <span class="font-bold text-sm md:text-base tracking-wide text-slate-900 z-10">🟢 LESS FRESH</span>
-                                    <span class="font-medium text-[10px] md:text-xs text-slate-800/80 mt-0.5 z-10">Hijau - Kuning (Hue 40-120)</span>
+                                <div onclick="updateZone(3)" id="zone3" class="flex-1 bg-amber-800 flex flex-col justify-center items-center transition-all opacity-40 relative hover:brightness-105">
+                                    <span class="font-bold text-sm md:text-base tracking-wide text-white z-10">🟤 LESS FRESH</span>
+                                    <span class="font-medium text-[10px] md:text-xs text-amber-200 mt-0.5 z-10">Oranye-Cokelat (Hue ± 10-30°)</span>
                                 </div>
                             </div>
-                            <p class="text-xs text-center text-slate-400 font-medium">Klik pada salah satu blok warna di atas untuk melihat parameter kimianya.</p>
+                            <p class="text-xs text-center text-slate-400 font-medium">Klik pada salah satu blok warna di atas untuk melihat interpretasi kimianya.</p>
                         </div>
 
                         <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col md:flex-row gap-6 items-center">
-                            <div class="flex-shrink-0 w-24 h-24 rounded-full border-4 shadow-inner flex items-center justify-center font-bold text-white text-xl transition-colors duration-500 bg-purple-700 border-purple-200" id="zoneColorCircle">
-                                pH 3.8
+                            <div class="flex-shrink-0 w-24 h-24 rounded-full border-4 shadow-inner flex items-center justify-center font-bold text-yellow-900 text-xl transition-colors duration-500 bg-yellow-400 border-yellow-200" id="zoneColorCircle">
+                                pH 6.0
                             </div>
                             <div class="flex-1 space-y-3">
-                                <div>
-                                    <span id="zoneSubtitle" class="text-[10px] font-bold uppercase tracking-wider text-purple-600">Interpretasi Kimiawi</span>
-                                    <h4 id="zoneTitleOut" class="font-heading font-bold text-slate-800 text-lg mt-0.5">Struktur Flavonium Stabil (Kondisi Segar)</h4>
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <span id="zoneSubtitle" class="text-[10px] font-bold uppercase tracking-wider text-yellow-700">Interpretasi Kimiawi</span>
+                                        <h4 id="zoneTitleOut" class="font-heading font-bold text-slate-800 text-lg mt-0.5">Kurkumin Relatif Stabil (Kondisi Awal)</h4>
+                                    </div>
+                                    <span id="zoneBadgeOut" class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-bold uppercase">Status: FRESH</span>
                                 </div>
                                 <div class="grid grid-cols-2 gap-4 text-xs bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                                    <div><span class="text-slate-500 block mb-0.5">Kondisi pH Ruang:</span><span id="zonePhOut" class="font-bold text-slate-800 text-sm">3.5 - 4.2 (Asam)</span></div>
-                                    <div><span class="text-slate-500 block mb-0.5">Laju Etilen:</span><span id="zoneEthOut" class="font-bold text-slate-800 text-sm">&lt; 0.05 ppm</span></div>
+                                    <div><span class="text-slate-500 block mb-0.5">Kondisi pH Ruang:</span><span id="zonePhOut" class="font-bold text-slate-800 text-sm">± 5 – 7 (Asam-Netral)</span></div>
+                                    <div><span class="text-slate-500 block mb-0.5">Indikasi Etilen:</span><span id="zoneEthOut" class="font-bold text-slate-800 text-sm">Relatif Rendah</span></div>
                                 </div>
                                 <p id="zoneDescOut" class="text-xs text-slate-600 leading-relaxed pt-1">
-                                    Warna ungu pekat menandakan buah baru saja dipanen atau disimpan dalam kondisi ideal. Laju respirasi terkontrol dengan baik. Puncak kesegaran terjaga optimal.
+                                    Perubahan warna masih minimal. Kondisi lingkungan relatif asam–netral. Buah berada pada kondisi kesegaran relatif baik.
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- INVENTORY TAB -->
                 <div id="tab-dash-inventory" class="tab-content hidden space-y-6">
                     <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200 space-y-6">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-5">
@@ -358,18 +370,16 @@
                                 <p class="text-sm text-slate-500 mt-1">Sistem antrean prioritas konsumsi berdasarkan data masuk paling awal.</p>
                             </div>
                         </div>
-
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            <!-- Form Add -->
                             <div class="lg:col-span-1 bg-slate-50 border border-slate-200 p-5 rounded-2xl h-fit">
                                 <h3 class="font-bold text-slate-700 mb-4 text-sm uppercase tracking-wider border-b border-slate-200 pb-2">Tambah Stok Masuk</h3>
                                 <form id="form-inventory" onsubmit="addInventory(event)" class="space-y-4">
                                     <div>
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Buah</label>
-                                        <input type="text" id="inv-input-name" placeholder="Misal: Pisang Cavendish" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition" required>
+                                        <input type="text" id="inv-input-name" placeholder="Misal: Pisang Cavendish" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-500 outline-none transition" required>
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Panen / Masuk</label>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Masuk</label>
                                         <input type="date" id="inv-input-date" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-500 outline-none transition" required>
                                     </div>
                                     <div>
@@ -381,8 +391,6 @@
                                     </button>
                                 </form>
                             </div>
-
-                            <!-- List Table -->
                             <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
                                 <div class="overflow-x-auto">
                                     <table class="w-full text-left text-sm">
@@ -394,9 +402,7 @@
                                                 <th class="py-3 px-4 text-right">Aksi</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="inv-tbody" class="divide-y divide-slate-100">
-                                            <!-- Data dinamis akan dimuat di sini oleh JS -->
-                                        </tbody>
+                                        <tbody id="inv-tbody" class="divide-y divide-slate-100"></tbody>
                                     </table>
                                 </div>
                             </div>
@@ -404,6 +410,7 @@
                     </div>
                 </div>
                 
+                <!-- LAB TAB -->
                 <div id="tab-dash-lab" class="tab-content hidden space-y-6">
                     <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200">
                         <div class="text-center max-w-2xl mx-auto mb-8">
@@ -441,39 +448,16 @@
                             <!-- Card 2: DOSE CALCULATOR -->
                             <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col h-full relative overflow-hidden">
                                 <h3 class="font-bold text-slate-700 text-lg mb-1 flex items-center gap-2"><i class="fa-solid fa-droplet text-kitosan-600"></i> 2. SPRAY DOSE CALCULATOR</h3>
-                                <p class="text-xs text-slate-500 mb-5">"Berapa kali harus disemprot?". Sistem menghitung kebutuhan volume coating (Luas permukaan × Target coverage).</p>
+                                <p class="text-xs text-slate-500 mb-5">"Berapa kali harus disemprot?". Sistem menghitung kebutuhan volume coating.</p>
 
                                 <form id="form-spray-dose" onsubmit="calculateSprayDose(event)" class="space-y-4 relative z-10">
                                     <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-xs font-bold text-slate-700 mb-1">Jenis Buah</label>
-                                            <input type="text" id="dose-fruit" placeholder="Cth: Mangga" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-kitosan-500 outline-none transition" required>
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs font-bold text-slate-700 mb-1">Jumlah Buah</label>
-                                            <input type="number" step="1" id="dose-qty" value="1" min="1" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-kitosan-500 outline-none transition" required>
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs font-bold text-slate-700 mb-1">Berat per buah (g)</label>
-                                            <input type="number" step="1" id="dose-weight" placeholder="Cth: 500" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-kitosan-500 outline-none transition" required>
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs font-bold text-slate-700 mb-1">Diameter (cm)</label>
-                                            <input type="number" step="0.1" id="dose-diameter" placeholder="Cth: 10" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-kitosan-500 outline-none transition" required>
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs font-bold text-slate-700 mb-1">Vol Botol (mL)</label>
-                                            <input type="number" step="1" id="dose-bottle" placeholder="Cth: 100" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-kitosan-500 outline-none transition" required>
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs font-bold text-slate-700 mb-1">Vol / Spray (mL)</label>
-                                            <input type="number" step="0.001" id="dose-volspray" placeholder="0.15" class="w-full p-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-kitosan-500 outline-none transition bg-amber-50 font-bold text-amber-900" required>
-                                        </div>
-                                        <div class="col-span-2 hidden">
-                                            <!-- Disembunyikan, untuk perhitungan efisiensi bila diperlukan di masa depan -->
-                                            <label class="block text-xs font-bold text-slate-700 mb-1">Konsentrasi Kitosan (%)</label>
-                                            <input type="number" step="0.1" id="dose-conc" value="1.5" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-kitosan-500 outline-none transition">
-                                        </div>
+                                        <div><label class="block text-xs font-bold text-slate-700 mb-1">Jenis Buah</label><input type="text" id="dose-fruit" placeholder="Cth: Mangga" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-kitosan-500 outline-none" required></div>
+                                        <div><label class="block text-xs font-bold text-slate-700 mb-1">Jumlah Buah</label><input type="number" step="1" id="dose-qty" value="1" min="1" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-kitosan-500 outline-none" required></div>
+                                        <div><label class="block text-xs font-bold text-slate-700 mb-1">Berat per buah (g)</label><input type="number" step="1" id="dose-weight" placeholder="Cth: 500" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-kitosan-500 outline-none" required></div>
+                                        <div><label class="block text-xs font-bold text-slate-700 mb-1">Diameter (cm)</label><input type="number" step="0.1" id="dose-diameter" placeholder="Cth: 10" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-kitosan-500 outline-none" required></div>
+                                        <div><label class="block text-xs font-bold text-slate-700 mb-1">Vol Botol (mL)</label><input type="number" step="1" id="dose-bottle" placeholder="Cth: 100" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-kitosan-500 outline-none" required></div>
+                                        <div><label class="block text-xs font-bold text-slate-700 mb-1">Vol / Spray (mL)</label><input type="number" step="0.001" id="dose-volspray" placeholder="0.15" class="w-full p-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-kitosan-500 outline-none bg-amber-50 font-bold text-amber-900" required></div>
                                     </div>
                                     <div class="flex gap-3 pt-2">
                                         <button type="submit" class="flex-1 bg-kitosan-600 hover:bg-kitosan-700 text-white font-bold py-3 rounded-xl shadow-md transition text-sm">Hitung Dosis</button>
@@ -485,49 +469,29 @@
 
                         <!-- RESULT AREA -->
                         <div id="dose-result-container" class="mt-8 hidden max-w-2xl mx-auto">
+                            <!-- Existing content preserved via JS dynamic mapping, hidden initially -->
                             <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-xl overflow-hidden text-white border border-slate-700">
                                 <div class="p-6 border-b border-slate-700 flex justify-between items-center">
                                     <div class="flex items-center gap-3">
                                         <div id="out-icon" class="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center text-xl">🥭</div>
-                                        <div>
-                                            <h4 id="out-fruit" class="font-bold text-lg tracking-wide uppercase">MANGO</h4>
-                                            <p id="out-summary" class="text-xs text-slate-400">Berat: 500 g | Ukuran: ±10 cm | Volume/spray: 0.15 mL</p>
-                                        </div>
+                                        <div><h4 id="out-fruit" class="font-bold text-lg tracking-wide uppercase">MANGO</h4><p id="out-summary" class="text-xs text-slate-400">Berat: 500 g | Ukuran: ±10 cm | Volume/spray: 0.15 mL</p></div>
                                     </div>
-                                    <div class="text-right">
-                                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Target</span>
-                                        <span id="out-qty" class="text-xl font-bold text-kitosan-400">1 Buah</span>
-                                    </div>
+                                    <div class="text-right"><span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Target</span><span id="out-qty" class="text-xl font-bold text-kitosan-400">1 Buah</span></div>
                                 </div>
-                                
                                 <div class="p-6 grid grid-cols-2 gap-6">
-                                    <div>
-                                        <span class="text-xs text-slate-400 block mb-1">Estimated Application</span>
-                                        <div class="flex items-baseline gap-2">
-                                            <span class="text-2xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-droplet text-sky-400"></i> <span id="out-vol">±1.8</span></span>
-                                            <span class="text-sm text-slate-400">mL</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <span class="text-xs text-slate-400 block mb-1">Kebutuhan Semprotan</span>
-                                        <div class="flex items-baseline gap-2">
-                                            <span class="text-2xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-spray-can text-kitosan-400"></i> <span id="out-spray">±12</span></span>
-                                            <span class="text-sm text-slate-400">spray</span>
-                                        </div>
-                                    </div>
+                                    <div><span class="text-xs text-slate-400 block mb-1">Estimated Application</span><div class="flex items-baseline gap-2"><span class="text-2xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-droplet text-sky-400"></i> <span id="out-vol">±1.8</span></span><span class="text-sm text-slate-400">mL</span></div></div>
+                                    <div><span class="text-xs text-slate-400 block mb-1">Kebutuhan Semprotan</span><div class="flex items-baseline gap-2"><span class="text-2xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-spray-can text-kitosan-400"></i> <span id="out-spray">±12</span></span><span class="text-sm text-slate-400">spray</span></div></div>
                                 </div>
-                                
                                 <div class="bg-slate-950/50 p-4 border-t border-slate-700 flex justify-between items-center text-xs">
                                     <span class="flex items-center gap-2 text-slate-300"><i class="fa-solid fa-recycle text-emerald-400"></i> Material efficiency: <span id="out-eff" class="font-bold text-white">94%</span></span>
                                     <span id="out-bottle-info" class="text-slate-400 italic">Mengkonsumsi 1.8% dari botol</span>
                                 </div>
                             </div>
-                            <p class="text-[11px] text-center text-slate-500 mt-3 px-4 font-medium italic">📌 Gunakan hasil sebagai estimasi awal; dosis aktual harus ditentukan melalui uji formulasi dan coverage permukaan di laboratorium.</p>
                         </div>
-                        
                     </div>
                 </div>
                 
+                <!-- RESCUE TAB -->
                 <div id="tab-dash-rescue" class="tab-content hidden space-y-6">
                     <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200">
                         <div class="border-b border-slate-100 pb-5 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -537,18 +501,262 @@
                                 </h2>
                                 <p class="text-sm text-slate-500 mt-1">Cegah food waste! Dapatkan rekomendasi pengolahan untuk buah dengan status LESS FRESH.</p>
                             </div>
-                            
-                            <!-- Form Mini -->
                             <form id="form-rescue" onsubmit="addRescue(event)" class="flex items-center gap-2 w-full md:w-auto bg-slate-50 p-2 rounded-xl border border-slate-200">
                                 <input type="text" id="res-input-name" placeholder="Nama Buah..." class="w-full md:w-32 p-2 rounded-lg text-sm border border-slate-200 outline-none focus:ring-2 focus:ring-emerald-400" required>
                                 <input type="number" step="0.1" id="res-input-qty" placeholder="Kg" class="w-20 p-2 rounded-lg text-sm border border-slate-200 outline-none focus:ring-2 focus:ring-emerald-400" required>
                                 <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white p-2 rounded-lg font-bold transition"><i class="fa-solid fa-plus"></i></button>
                             </form>
                         </div>
+                        <div id="rescue-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+                    </div>
+                </div>
 
-                        <!-- Grid Cards -->
-                        <div id="rescue-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                            <!-- Data dimuat di sini -->
+                <!-- KURVIA AI CHATBOT TAB -->
+                <div id="tab-dash-aichat" class="tab-content hidden h-[80vh]">
+                    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 flex flex-col h-full overflow-hidden">
+                        <div class="p-5 border-b border-slate-100 bg-indigo-50/50 flex justify-between items-center">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                                    <i class="fa-solid fa-robot"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-heading font-bold text-slate-800 leading-tight">KURVIA AI</h3>
+                                    <p class="text-[10px] text-slate-500"><span class="w-1.5 h-1.5 inline-block bg-green-500 rounded-full mr-1"></span>Online | Knowledge Base 25+ Masalah</p>
+                                </div>
+                            </div>
+                            <button onclick="clearChat()" class="text-xs text-slate-400 hover:text-slate-600 underline">Clear Chat</button>
+                        </div>
+                        
+                        <div id="chat-box" class="flex-1 overflow-y-auto p-5 space-y-4 bg-slate-50">
+                            <!-- Greeting Message -->
+                            <div class="flex gap-3">
+                                <div class="w-8 h-8 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center text-indigo-600 text-xs"><i class="fa-solid fa-robot"></i></div>
+                                <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 text-sm text-slate-700 max-w-[80%] shadow-sm">
+                                    Halo! Saya KURVIA AI 🤖. Ada yang bisa saya bantu terkait kondisi buah, perubahan warna sticker, panduan spray, atau pencegahan food waste?
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Typing Indicator (Hidden by default) -->
+                        <div id="ai-typing" class="hidden px-5 py-2 bg-slate-50">
+                            <div class="flex gap-3 items-center">
+                                <div class="w-8 h-8 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center text-indigo-600 text-xs"><i class="fa-solid fa-robot"></i></div>
+                                <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 text-sm text-slate-400 shadow-sm flex gap-1">
+                                    <div class="w-1.5 h-1.5 bg-slate-400 rounded-full typing-dot"></div>
+                                    <div class="w-1.5 h-1.5 bg-slate-400 rounded-full typing-dot"></div>
+                                    <div class="w-1.5 h-1.5 bg-slate-400 rounded-full typing-dot"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-4 border-t border-slate-100 bg-white">
+                            <form onsubmit="handleAIChat(event)" class="flex gap-2 relative">
+                                <input type="text" id="chat-input" placeholder="Tanya sesuatu tentang buah / spray / sticker..." class="flex-1 p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition" required>
+                                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 rounded-xl transition flex items-center justify-center shadow-md">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </form>
+                            <p class="text-[9px] text-center text-slate-400 mt-2">Prototype: Simulated responses based on local knowledge base.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FRUIT PROFILE TAB -->
+                <div id="tab-dash-fruitprofile" class="tab-content hidden space-y-6">
+                    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200">
+                        <div class="border-b border-slate-100 pb-5 mb-6">
+                            <h2 class="text-2xl font-bold font-heading text-slate-800 flex items-center gap-3">
+                                <i class="fa-solid fa-book-open text-red-500"></i> Fruit Profile Database
+                            </h2>
+                            <p class="text-sm text-slate-500 mt-1">Karakteristik buah klimaterik, produksi etilen, dan panduan penanganan dengan KURVIA.</p>
+                        </div>
+                        
+                        <div id="fruit-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                            <!-- Injected via JS -->
+                        </div>
+
+                        <!-- Fruit Detail View (Hidden Initially) -->
+                        <div id="fruit-detail-view" class="hidden border border-slate-200 rounded-2xl bg-slate-50 p-6 relative">
+                            <button onclick="closeFruitDetail()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark text-xl"></i></button>
+                            <div class="flex items-center gap-4 mb-6 border-b border-slate-200 pb-4">
+                                <div id="fd-icon" class="text-4xl bg-white p-3 rounded-xl shadow-sm border border-slate-100">🥭</div>
+                                <div>
+                                    <h3 id="fd-name" class="text-2xl font-bold font-heading text-slate-800">Mangga</h3>
+                                    <p id="fd-type" class="text-xs text-slate-500 font-medium uppercase tracking-widest">Klimaterik Tinggi</p>
+                                </div>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-6 text-sm">
+                                <div class="space-y-3">
+                                    <div class="bg-white p-3 rounded-xl border border-slate-200"><span class="block text-xs font-bold text-slate-400 uppercase">Produksi Etilen</span><span id="fd-ethylene" class="font-semibold text-slate-700">Tinggi</span></div>
+                                    <div class="bg-white p-3 rounded-xl border border-slate-200"><span class="block text-xs font-bold text-slate-400 uppercase">Kondisi Penyimpanan</span><span id="fd-storage" class="font-semibold text-slate-700">Suhu 13°C (Hindari chilling injury)</span></div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="bg-white p-3 rounded-xl border border-slate-200"><span class="block text-xs font-bold text-slate-400 uppercase">Karakter Fisik Pematangan</span><span id="fd-physical" class="text-slate-700">Kulit menguning, tekstur melunak, aroma kuat.</span></div>
+                                    <div class="bg-white p-3 rounded-xl border border-slate-200"><span class="block text-xs font-bold text-slate-400 uppercase">Rekomendasi KURVIA</span><span id="fd-kurvia" class="text-slate-700">Spray kitosan saat 80% matang, gunakan 1 stiker/wadah 5kg.</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KURVIA MITRA TAB -->
+                <div id="tab-dash-mitra" class="tab-content hidden space-y-6">
+                    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200 space-y-6">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-5">
+                            <div>
+                                <h2 class="text-2xl font-bold font-heading text-slate-800 flex items-center gap-3">
+                                    <i class="fa-solid fa-handshake text-blue-500"></i> KURVIA Mitra
+                                </h2>
+                                <p class="text-sm text-slate-500 mt-1">Jaringan pedagang buah dan kemitraan implementasi sistem preservasi KURVIA.</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <span class="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-200">10 Kota Malang</span>
+                                <span class="bg-green-50 text-green-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-green-200">10 Kota Batu</span>
+                            </div>
+                        </div>
+
+                        <!-- Kinerja/Target Cards -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white shadow-md">
+                                <div class="text-blue-100 text-xs uppercase tracking-wider font-bold mb-1">Total Calon Mitra</div>
+                                <div class="text-4xl font-heading font-bold">20<span class="text-lg font-normal opacity-80">/20</span></div>
+                            </div>
+                            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                                <div class="text-slate-400 text-xs uppercase tracking-wider font-bold mb-1">Status Implementasi</div>
+                                <div class="text-xl font-heading font-bold text-slate-700 mt-2">Tahap Uji Coba <i class="fa-solid fa-spinner fa-spin text-blue-500 ml-2"></i></div>
+                            </div>
+                            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                                <div class="text-slate-400 text-xs uppercase tracking-wider font-bold mb-1">Estimasi Waste Dicegah</div>
+                                <div class="text-2xl font-heading font-bold text-emerald-600 mt-1">± 150 kg / bulan</div>
+                            </div>
+                        </div>
+
+                        <!-- Directory List (Dummy Prototype) -->
+                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mt-6 mb-2">Direktori Mitra (Prototype)</h3>
+                        <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+                            <table class="w-full text-left text-sm whitespace-nowrap">
+                                <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-semibold">
+                                    <tr><th class="py-3 px-4">Nama Mitra</th><th class="py-3 px-4">Lokasi</th><th class="py-3 px-4">Komoditas Utama</th><th class="py-3 px-4 text-center">Status</th></tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 bg-white" id="mitra-tbody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KURVIA STORE TAB -->
+                <div id="tab-dash-store" class="tab-content hidden space-y-6">
+                    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200 flex flex-col md:flex-row gap-8">
+                        <div class="flex-1 space-y-6">
+                            <div>
+                                <h2 class="text-2xl font-bold font-heading text-slate-800 flex items-center gap-3">
+                                    <i class="fa-solid fa-store text-teal-500"></i> KURVIA Store
+                                </h2>
+                                <p class="text-sm text-slate-500 mt-1">Pesan perlengkapan preservasi KURVIA secara langsung.</p>
+                            </div>
+                            
+                            <!-- Product Card -->
+                            <div class="border border-slate-200 rounded-2xl p-5 bg-slate-50 flex flex-col sm:flex-row gap-6 relative overflow-hidden">
+                                <div class="w-full sm:w-1/3 bg-white rounded-xl border border-slate-100 flex items-center justify-center p-4 shadow-sm min-h-[150px]">
+                                    <i class="fa-solid fa-box-open text-6xl text-teal-200"></i>
+                                </div>
+                                <div class="flex-1 flex flex-col justify-center">
+                                    <h3 class="text-xl font-bold text-slate-800 font-heading">KURVIA Starter Pack</h3>
+                                    <p class="text-2xl font-bold text-teal-600 my-2">Rp 30.000</p>
+                                    <ul class="text-xs text-slate-600 space-y-1 mb-4">
+                                        <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> 🧴 1x Kitosan Spray (100 mL)</li>
+                                        <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> 🟡 1x Wadah Kurkumin Freshness Sticker</li>
+                                        <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> 🔘 25 lembar stiker indikator</li>
+                                    </ul>
+                                    <button onclick="addToCart()" class="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 px-6 rounded-xl transition shadow-md flex items-center justify-center gap-2 text-sm">
+                                        <i class="fa-solid fa-cart-plus"></i> Tambah ke Keranjang
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Cart Summary -->
+                        <div class="w-full md:w-1/3 bg-slate-800 text-white rounded-2xl p-6 flex flex-col shadow-lg">
+                            <h3 class="text-lg font-bold font-heading border-b border-slate-700 pb-3 mb-4 flex justify-between items-center">
+                                Ringkasan Belanja <span id="cart-badge" class="bg-teal-500 text-xs px-2 py-1 rounded-full">0 Item</span>
+                            </h3>
+                            <div id="cart-items" class="flex-1 flex flex-col justify-center items-center text-slate-400 space-y-2 py-10">
+                                <i class="fa-solid fa-basket-shopping text-4xl mb-2"></i>
+                                <p class="text-sm">Keranjang masih kosong</p>
+                            </div>
+                            <div id="cart-total-area" class="hidden mt-auto pt-4 border-t border-slate-700 space-y-4">
+                                <div class="flex justify-between items-center"><span class="text-sm text-slate-300">Total Harga</span><span id="cart-total" class="text-xl font-bold text-white">Rp 0</span></div>
+                                <button onclick="checkout()" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-900 font-bold py-3 rounded-xl transition">Checkout Pesanan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FEEDBACK TAB -->
+                <div id="tab-dash-feedback" class="tab-content hidden space-y-6">
+                    <div class="bg-white rounded-3xl p-6 md:p-10 shadow-sm border border-slate-200 max-w-3xl mx-auto">
+                        <div class="text-center mb-8">
+                            <div class="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-3 text-amber-500 text-2xl"><i class="fa-solid fa-star"></i></div>
+                            <h2 class="text-2xl font-bold font-heading text-slate-800">Feedback & Evaluasi</h2>
+                            <p class="text-sm text-slate-500 mt-2">Bantu kami mengembangkan KURVIA dengan memberikan ulasan Anda.</p>
+                        </div>
+                        
+                        <form id="form-feedback" onsubmit="submitFeedback(event)" class="space-y-5">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-2">Penilaian Anda terhadap Sistem KURVIA</label>
+                                <div class="flex gap-2 text-2xl text-slate-200 cursor-pointer" id="star-rating">
+                                    <i class="fa-solid fa-star hover:text-amber-400 transition" onclick="setRating(1)"></i>
+                                    <i class="fa-solid fa-star hover:text-amber-400 transition" onclick="setRating(2)"></i>
+                                    <i class="fa-solid fa-star hover:text-amber-400 transition" onclick="setRating(3)"></i>
+                                    <i class="fa-solid fa-star hover:text-amber-400 transition" onclick="setRating(4)"></i>
+                                    <i class="fa-solid fa-star hover:text-amber-400 transition" onclick="setRating(5)"></i>
+                                </div>
+                                <input type="hidden" id="feedback-rating" value="0" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-2">Kategori Evaluasi</label>
+                                <select class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-500 outline-none bg-white">
+                                    <option>Evaluasi Kitosan Spray</option>
+                                    <option>Evaluasi Kurkumin Sticker</option>
+                                    <option>Platform Monitoring (Website)</option>
+                                    <option>KURVIA AI Chatbot</option>
+                                    <option>Lainnya</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-2">Kritik, Saran, & Kendala</label>
+                                <textarea rows="4" placeholder="Tuliskan pengalaman Anda menggunakan KURVIA..." class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-amber-500 outline-none resize-none" required></textarea>
+                            </div>
+                            
+                            <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl shadow-md transition">Kirim Feedback</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- CONTACT TAB -->
+                <div id="tab-dash-contact" class="tab-content hidden space-y-6">
+                    <div class="bg-white rounded-3xl p-6 md:p-10 shadow-sm border border-slate-200 max-w-3xl mx-auto text-center">
+                        <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-200 shadow-inner">
+                            <i class="fa-solid fa-headset text-4xl text-slate-400"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold font-heading text-slate-800 mb-2">Contact & Support</h2>
+                        <p class="text-sm text-slate-500 mb-8 max-w-md mx-auto">Butuh bantuan mengenai pemesanan produk, informasi kemitraan, atau panduan penggunaan platform KURVIA?</p>
+                        
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <a href="tel:081331965094" class="block p-5 border border-slate-200 rounded-2xl hover:bg-green-50 hover:border-green-200 transition group">
+                                <i class="fa-brands fa-whatsapp text-3xl text-green-500 mb-3 group-hover:scale-110 transition-transform"></i>
+                                <h3 class="font-bold text-slate-800">Admin KURVIA</h3>
+                                <p class="text-sm text-slate-500 mt-1">0813-3196-5094</p>
+                            </a>
+                            <a href="https://instagram.com/kurviafresh" target="_blank" class="block p-5 border border-slate-200 rounded-2xl hover:bg-pink-50 hover:border-pink-200 transition group">
+                                <i class="fa-brands fa-instagram text-3xl text-pink-500 mb-3 group-hover:scale-110 transition-transform"></i>
+                                <h3 class="font-bold text-slate-800">Instagram</h3>
+                                <p class="text-sm text-slate-500 mt-1">@kurviafresh</p>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -562,9 +770,7 @@
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all duration-300 scale-95 opacity-0" id="custom-modal-content">
             <h3 id="custom-modal-title" class="text-lg font-bold text-slate-800 mb-2 font-heading">Peringatan</h3>
             <p id="custom-modal-desc" class="text-sm text-slate-600 mb-6 leading-relaxed">Pesan peringatan disini.</p>
-            
             <input type="number" step="0.1" id="custom-modal-input" class="hidden w-full p-3 border border-slate-300 rounded-xl text-sm mb-5 focus:ring-2 focus:ring-[#e11d48] outline-none" placeholder="">
-
             <div class="flex justify-end gap-3">
                 <button id="custom-modal-btn-cancel" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition">Batal</button>
                 <button id="custom-modal-btn-confirm" class="px-5 py-2.5 bg-[#e11d48] hover:bg-rose-700 text-white text-sm font-semibold rounded-xl transition shadow-lg shadow-rose-900/20">OK</button>
@@ -581,6 +787,8 @@
             if (target) {
                 target.classList.remove('hidden');
                 target.classList.add('block');
+                // Scroll to top
+                document.getElementById('main-content').scrollTo(0,0);
             }
 
             document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -593,11 +801,16 @@
                 }
             });
 
-            // Matikan kamera jika keluar dari tab scanner
-            if (tabName !== 'freshcheck') {
-                stopAnalyzerCamera();
+            // Handle init states for specific tabs
+            if (tabName === 'fruitprofile' && document.getElementById('fruit-grid').innerHTML === '') {
+                renderFruitProfiles();
+            }
+            if (tabName === 'mitra' && document.getElementById('mitra-tbody').innerHTML === '') {
+                renderMitra();
             }
 
+            // Matikan kamera jika keluar dari tab scanner
+            if (tabName !== 'freshcheck') stopAnalyzerCamera();
             if (window.innerWidth < 768) toggleMobileMenu();
         }
 
@@ -605,7 +818,7 @@
             document.getElementById('sidebar').classList.toggle('-translate-x-full');
         }
 
-        // --- 3 ZONE INDICATOR LOGIC ---
+        // --- 3 ZONE INDICATOR LOGIC (Kurkumin Update) ---
         function updateZone(zoneIndex) {
             const z1 = document.getElementById('zone1');
             const z2 = document.getElementById('zone2');
@@ -619,34 +832,41 @@
             const eth = document.getElementById('zoneEthOut');
             const desc = document.getElementById('zoneDescOut');
             const circle = document.getElementById('zoneColorCircle');
+            const badge = document.getElementById('zoneBadgeOut');
 
             if (zoneIndex === 1) {
                 z1.classList.remove('opacity-40'); z1.classList.add('opacity-100');
-                title.innerText = "Struktur Flavonium Stabil (Kondisi Segar)";
-                sub.className = "text-[10px] font-bold uppercase tracking-wider text-purple-600";
-                ph.innerText = "3.5 - 4.2 (Asam)";
-                eth.innerText = "< 0.05 ppm";
-                desc.innerText = "Warna ungu pekat menandakan buah baru saja dipanen atau disimpan dalam kondisi ideal. Laju respirasi terkontrol dengan baik.";
-                circle.className = "flex-shrink-0 w-24 h-24 rounded-full border-4 shadow-inner flex items-center justify-center font-bold text-white text-xl transition-colors duration-500 bg-purple-700 border-purple-200";
-                circle.innerText = "pH 3.8";
+                title.innerText = "Kurkumin Relatif Stabil (Kondisi Awal)";
+                sub.className = "text-[10px] font-bold uppercase tracking-wider text-yellow-700";
+                ph.innerText = "± 5 – 7 (Asam-Netral)";
+                eth.innerText = "Relatif Rendah";
+                desc.innerText = "Perubahan warna masih minimal. Kondisi lingkungan relatif asam–netral. Buah berada pada kondisi kesegaran relatif baik.";
+                circle.className = "flex-shrink-0 w-24 h-24 rounded-full border-4 shadow-inner flex items-center justify-center font-bold text-yellow-900 text-xl transition-colors duration-500 bg-yellow-400 border-yellow-200";
+                circle.innerText = "pH 6.0";
+                badge.className = "bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-bold uppercase";
+                badge.innerText = "Status: FRESH";
             } else if (zoneIndex === 2) {
                 z2.classList.remove('opacity-40'); z2.classList.add('opacity-100');
-                title.innerText = "Basa Karbinol Semu (Perlu Perhatian)";
-                sub.className = "text-[10px] font-bold uppercase tracking-wider text-pink-600";
-                ph.innerText = "4.5 - 5.5";
-                eth.innerText = "0.2 - 0.5 ppm";
-                desc.innerText = "Warna merah muda (pink). Kenaikan pH dan emisi etilen memicu perubahan struktur. Buah mulai matang, tekstur melunak. Segera konsumsi.";
-                circle.className = "flex-shrink-0 w-24 h-24 rounded-full border-4 shadow-inner flex items-center justify-center font-bold text-white text-xl transition-colors duration-500 bg-pink-400 border-pink-200";
-                circle.innerText = "pH 5.0";
+                title.innerText = "Transisi Kondisi Lingkungan";
+                sub.className = "text-[10px] font-bold uppercase tracking-wider text-orange-700";
+                ph.innerText = "± 7 – 8 (Mulai Basa)";
+                eth.innerText = "Mulai Meningkat";
+                desc.innerText = "Terjadi perubahan kondisi kimia yang memengaruhi indikator. Proses pematangan buah dapat semakin berlangsung. Sticker mulai mengalami pergeseran warna.";
+                circle.className = "flex-shrink-0 w-24 h-24 rounded-full border-4 shadow-inner flex items-center justify-center font-bold text-white text-xl transition-colors duration-500 bg-orange-500 border-orange-300";
+                circle.innerText = "pH 7.5";
+                badge.className = "bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs font-bold uppercase";
+                badge.innerText = "Status: CHECK";
             } else {
                 z3.classList.remove('opacity-40'); z3.classList.add('opacity-100');
-                title.innerText = "Basa Kuinonida Kalkon (Mutu Menurun)";
-                sub.className = "text-[10px] font-bold uppercase tracking-wider text-lime-600";
-                ph.innerText = "> 6.0 (Basa Ringan)";
-                eth.innerText = "> 1.0 ppm (Tinggi)";
-                desc.innerText = "Warna hijau hingga kuning menandakan indikasi degradasi mutu yang signifikan. Buah sangat matang (overripe). Direkomendasikan masuk modul Rescue.";
-                circle.className = "flex-shrink-0 w-24 h-24 rounded-full border-4 shadow-inner flex items-center justify-center font-bold text-white text-xl transition-colors duration-500 bg-lime-400 border-lime-200";
-                circle.innerText = "pH 6.5";
+                title.innerText = "Respons Lingkungan Basa";
+                sub.className = "text-[10px] font-bold uppercase tracking-wider text-amber-700";
+                ph.innerText = "± 8 – 9+ (Basa)";
+                eth.innerText = "Berpotensi Tinggi";
+                desc.innerText = "Respons kurkumin semakin kuat terhadap lingkungan basa. Perubahan warna semakin terlihat (Cokelat/Kemerahan). Proses pematangan perlu diperiksa lebih lanjut.";
+                circle.className = "flex-shrink-0 w-24 h-24 rounded-full border-4 shadow-inner flex items-center justify-center font-bold text-white text-xl transition-colors duration-500 bg-amber-800 border-amber-600";
+                circle.innerText = "pH 8.5";
+                badge.className = "bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-bold uppercase";
+                badge.innerText = "Status: LESS FRESH";
             }
         }
 
@@ -675,60 +895,48 @@
             const btnFront = document.getElementById('btnCamFront');
             const btnBack = document.getElementById('btnCamBack');
 
-            // Hentikan kamera sebelumnya jika ada
             stopAnalyzerCamera();
             
             status.innerText = "[ MEMINTA IZIN KAMERA... ]";
             status.className = "absolute top-4 left-4 z-20 bg-amber-600/90 text-white font-mono text-[10px] px-3 py-1.5 rounded-md backdrop-blur-sm border border-white/20 uppercase shadow-sm";
 
-            // Update UI Button active state (Warna khusus e11d48)
             btnFront.className = facingMode === 'user' ? "flex-1 bg-[#e11d48] text-white text-xs font-bold py-3 px-4 rounded-xl transition shadow-md flex justify-center items-center gap-2" : "flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-3 px-4 rounded-xl transition border border-slate-200 flex justify-center items-center gap-2";
             btnBack.className = facingMode === 'environment' ? "flex-1 bg-[#e11d48] text-white text-xs font-bold py-3 px-4 rounded-xl transition shadow-md flex justify-center items-center gap-2" : "flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-3 px-4 rounded-xl transition border border-slate-200 flex justify-center items-center gap-2";
 
             if (facingMode === 'user') video.classList.add('mirrored');
             else video.classList.remove('mirrored');
 
-            // Gunakan constraint spesifik tanpa exact agar tetap punya fallback di device tertentu
-            const constraints = {
-                video: { facingMode: facingMode }
-            };
+            const constraints = { video: { facingMode: facingMode } };
 
             try {
                 streamVideo = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = streamVideo;
                 activeFacingMode = facingMode;
-                
                 video.onloadedmetadata = () => {
                     video.play();
                     status.innerText = "[ ANALISIS AKTIF ]";
                     status.className = "absolute top-4 left-4 z-20 bg-emerald-600/90 text-white font-mono text-[10px] px-3 py-1.5 rounded-md backdrop-blur-sm border border-white/20 uppercase shadow-sm animate-pulse";
-                    
-                    // Mulai loop analisis frame
                     if(animationFrame) cancelAnimationFrame(animationFrame);
                     animationFrame = requestAnimationFrame(processLiveFrame);
                 };
             } catch (err) {
                 console.error("Camera access failed:", err);
-                status.innerText = "[ AKSES DITOLAK / GAGAL ]";
+                status.innerText = "[ AKSES DITOLAK ]";
                 status.className = "absolute top-4 left-4 z-20 bg-rose-600/90 text-white font-mono text-[10px] px-3 py-1.5 rounded-md backdrop-blur-sm border border-white/20 uppercase shadow-sm";
                 alert("Tidak dapat mengakses kamera. Pastikan izin browser diberikan.");
             }
         }
 
         function stopAnalyzerCamera() {
-            if (streamVideo) {
-                streamVideo.getTracks().forEach(track => track.stop());
-                streamVideo = null;
+            if (streamVideo) { streamVideo.getTracks().forEach(track => track.stop()); streamVideo = null; }
+            if (animationFrame) { cancelAnimationFrame(animationFrame); animationFrame = null; }
+            const camFeed = document.getElementById('liveCameraFeed');
+            if(camFeed) camFeed.srcObject = null;
+            const camLiveStatus = document.getElementById('camLiveStatus');
+            if(camLiveStatus) {
+                camLiveStatus.innerText = "[ KAMERA OFFLINE ]";
+                camLiveStatus.className = "absolute top-4 left-4 z-20 bg-black/60 text-white font-mono text-[10px] px-3 py-1.5 rounded-md backdrop-blur-sm border border-white/20 uppercase shadow-sm";
             }
-            if (animationFrame) {
-                cancelAnimationFrame(animationFrame);
-                animationFrame = null;
-            }
-            document.getElementById('liveCameraFeed').srcObject = null;
-            document.getElementById('camLiveStatus').innerText = "[ KAMERA OFFLINE ]";
-            document.getElementById('camLiveStatus').className = "absolute top-4 left-4 z-20 bg-black/60 text-white font-mono text-[10px] px-3 py-1.5 rounded-md backdrop-blur-sm border border-white/20 uppercase shadow-sm";
-            
-            // Reset state tombol
             document.getElementById('btnCamFront').className = "flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-3 px-4 rounded-xl transition border border-slate-200 flex justify-center items-center gap-2";
             document.getElementById('btnCamBack').className = "flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-3 px-4 rounded-xl transition border border-slate-200 flex justify-center items-center gap-2";
         }
@@ -736,103 +944,80 @@
         function processLiveFrame() {
             const video = document.getElementById('liveCameraFeed');
             const canvas = document.getElementById('liveCameraCanvas');
-            
-            if (video.videoWidth === 0) {
-                animationFrame = requestAnimationFrame(processLiveFrame);
-                return;
-            }
+            if (video.videoWidth === 0) { animationFrame = requestAnimationFrame(processLiveFrame); return; }
 
             const ctx = canvas.getContext('2d', { willReadFrequently: true });
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            // Fokus pada kotak tengah (ukuran sample 40x40 px)
             const sampleSize = 40;
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
-
             let rSum = 0, gSum = 0, bSum = 0, validCount = 0;
 
             try {
                 const imgData = ctx.getImageData(cx - sampleSize/2, cy - sampleSize/2, sampleSize, sampleSize).data;
                 for (let i = 0; i < imgData.length; i += 4) {
-                    const r = imgData[i];
-                    const g = imgData[i+1];
-                    const b = imgData[i+2];
-                    
-                    // Filter warna terlalu gelap
-                    if ((r + g + b) / 3 > 40) {
-                        rSum += r; gSum += g; bSum += b;
-                        validCount++;
-                    }
+                    const r = imgData[i]; const g = imgData[i+1]; const b = imgData[i+2];
+                    if ((r + g + b) / 3 > 40) { rSum += r; gSum += g; bSum += b; validCount++; }
                 }
-            } catch (e) {
-                console.error("Canvas read error:", e);
-                validCount = 0;
-            }
+            } catch (e) { console.error(e); validCount = 0; }
 
             if (validCount > (sampleSize * sampleSize * 0.3)) {
-                const avgR = Math.round(rSum / validCount);
-                const avgG = Math.round(gSum / validCount);
-                const avgB = Math.round(bSum / validCount);
-                
+                const avgR = Math.round(rSum / validCount); const avgG = Math.round(gSum / validCount); const avgB = Math.round(bSum / validCount);
                 const hue = rgbToHue(avgR, avgG, avgB);
                 updateLiveUI(hue, avgR, avgG, avgB);
             } else {
                 resetLiveUI();
             }
-
-            // Loop 15 fps untuk menghemat kinerja (throttle sedikit)
-            setTimeout(() => {
-                if(streamVideo) animationFrame = requestAnimationFrame(processLiveFrame);
-            }, 66); 
+            setTimeout(() => { if(streamVideo) animationFrame = requestAnimationFrame(processLiveFrame); }, 66); 
         }
 
+        // Updated AI classification for Kurkumin
         function updateLiveUI(hue, r, g, b) {
             const badge = document.getElementById('aiBadge');
             const title = document.getElementById('aiStatusTitle');
             const preview = document.getElementById('aiColorPreview');
             
-            // Output elements
             document.getElementById('valHue').innerText = hue + "°";
             document.getElementById('valRgb').innerText = `${r}, ${g}, ${b}`;
             preview.style.backgroundColor = `rgb(${r},${g},${b})`;
-            preview.innerHTML = ''; // Kosongkan ikon
+            preview.innerHTML = '';
 
-            // Logika Klasifikasi Stiker Kurkumin
-            // FRESH: Ungu (Hue 260 - 325)
-            // CHECK: Pink/Merah (Hue 326 - 360 atau 0 - 20)
-            // LESS FRESH: Kuning/Hijau (Hue 40 - 130)
+            // Kurkumin Rules
+            // FRESH: 45 - 65 (Yellow)
+            // CHECK: 30 - 44 (Orange)
+            // LESS FRESH: 10 - 29 (Brown/Reddish)
 
-            if (hue >= 260 && hue <= 325) {
-                badge.className = "bg-purple-100 text-purple-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide";
+            if (hue >= 45 && hue <= 70) {
+                badge.className = "bg-yellow-100 text-yellow-800 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide";
                 badge.innerText = "ZONA 1: FRESH";
-                title.innerText = "Kondisi Sangat Segar";
-                document.getElementById('valPh').innerText = (3.5 + Math.random()*0.5).toFixed(1);
-                document.getElementById('valEth').innerText = "< 0.05 ppm";
-                document.getElementById('aiRecommendation').innerHTML = "<span class='text-purple-700 font-bold'>Aman:</span> Simpan pada tempat teduh atau kulkas. Warna ungu pekat membuktikan respirasi stabil.";
+                title.innerText = "Kondisi Relatif Stabil";
+                document.getElementById('valPh').innerText = (5 + Math.random()*2).toFixed(1);
+                document.getElementById('valEth').innerText = "Rendah";
+                document.getElementById('aiRecommendation').innerHTML = "<span class='text-yellow-700 font-bold'>Aman:</span> Stiker berwarna kuning. Kurkumin stabil pada pH asam/netral.";
             } 
-            else if (hue > 325 || hue <= 20) {
-                badge.className = "bg-pink-100 text-pink-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide";
+            else if (hue >= 30 && hue < 45) {
+                badge.className = "bg-orange-100 text-orange-800 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide";
                 badge.innerText = "ZONA 2: CHECK";
-                title.innerText = "Mulai Matang (Transisi)";
-                document.getElementById('valPh').innerText = (4.8 + Math.random()*0.7).toFixed(1);
-                document.getElementById('valEth').innerText = "0.30 ppm (Naik)";
-                document.getElementById('aiRecommendation').innerHTML = "<span class='text-pink-700 font-bold'>Perhatian:</span> Warna pink menandakan kenaikan pH. Segera konsumsi buah hari ini atau esok hari.";
+                title.innerText = "Lingkungan Mulai Berubah";
+                document.getElementById('valPh').innerText = (7 + Math.random()*1).toFixed(1);
+                document.getElementById('valEth').innerText = "Meningkat";
+                document.getElementById('aiRecommendation').innerHTML = "<span class='text-orange-700 font-bold'>Perhatian:</span> Stiker menjadi oranye. Indikasi pergeseran menuju kondisi basa dan pematangan.";
             } 
-            else if (hue >= 35 && hue <= 140) {
-                badge.className = "bg-lime-100 text-lime-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide";
+            else if (hue >= 0 && hue < 30) {
+                badge.className = "bg-amber-100 text-amber-800 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide";
                 badge.innerText = "ZONA 3: LESS FRESH";
-                title.innerText = "Mutu Menurun Signifikan";
-                document.getElementById('valPh').innerText = (6.0 + Math.random()*0.8).toFixed(1);
-                document.getElementById('valEth').innerText = "> 1.0 ppm (Tinggi)";
-                document.getElementById('aiRecommendation').innerHTML = "<span class='text-lime-700 font-bold'>Rescue:</span> Indikator menguning/kehijauan (basa). Buah terlalu matang, buka modul Food Rescue.";
+                title.innerText = "Respons Lingkungan Basa";
+                document.getElementById('valPh').innerText = (8 + Math.random()*1.5).toFixed(1);
+                document.getElementById('valEth').innerText = "Berpotensi Tinggi";
+                document.getElementById('aiRecommendation').innerHTML = "<span class='text-amber-700 font-bold'>Rescue:</span> Stiker kemerahan/cokelat. Segera periksa buah. Pertimbangkan modul Rescue.";
             } 
             else {
                 resetLiveUI();
                 document.getElementById('aiStatusTitle').innerText = "Warna Tidak Valid";
-                document.getElementById('aiRecommendation').innerText = "Arahkan kamera ke stiker indikator kurkumin (Warna Ungu, Pink, atau Kuning).";
+                document.getElementById('aiRecommendation').innerText = "Arahkan kamera ke stiker kurkumin (Kuning, Oranye, atau Cokelat).";
             }
         }
 
@@ -849,14 +1034,13 @@
             document.getElementById('aiRecommendation').innerText = "Pilih kamera untuk mulai membaca indikator warna. Pastikan pencahayaan cukup.";
         }
 
-        // --- CUSTOM MODAL SYSTEM (MENGGANTIKAN ALERT & CONFIRM BAWAAN) ---
+        // --- CUSTOM MODAL SYSTEM ---
         let modalCallback = null;
         let modalInputMode = false;
 
         function showModal({ title, desc, showCancel = false, confirmText = 'OK', type = 'info', isInput = false, inputPlaceholder = '' }, callback) {
             const modal = document.getElementById('custom-modal');
             const content = document.getElementById('custom-modal-content');
-            
             document.getElementById('custom-modal-title').innerText = title;
             document.getElementById('custom-modal-desc').innerText = desc;
             
@@ -868,29 +1052,16 @@
             modalCallback = callback;
             modalInputMode = isInput;
             
-            if (showCancel) btnCancel.classList.remove('hidden');
-            else btnCancel.classList.add('hidden');
+            if (showCancel) btnCancel.classList.remove('hidden'); else btnCancel.classList.add('hidden');
+            if (isInput) { inputField.classList.remove('hidden'); inputField.placeholder = inputPlaceholder; inputField.value = ''; } else { inputField.classList.add('hidden'); }
 
-            if (isInput) {
-                inputField.classList.remove('hidden');
-                inputField.placeholder = inputPlaceholder;
-                inputField.value = '';
-            } else {
-                inputField.classList.add('hidden');
-            }
-
-            // Ganti tema warna tombol konfirmasi
             if(type === 'danger') btnConfirm.className = "px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold rounded-xl transition shadow-md shadow-rose-900/20";
             else if (type === 'success') btnConfirm.className = "px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition shadow-md shadow-emerald-900/20";
             else btnConfirm.className = "px-5 py-2.5 bg-[#e11d48] hover:bg-rose-700 text-white text-sm font-semibold rounded-xl transition shadow-md shadow-rose-900/20";
 
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            setTimeout(() => {
-                content.classList.remove('scale-95', 'opacity-0');
-                content.classList.add('scale-100', 'opacity-100');
-                if(isInput) inputField.focus();
-            }, 10);
+            setTimeout(() => { content.classList.remove('scale-95', 'opacity-0'); content.classList.add('scale-100', 'opacity-100'); if(isInput) inputField.focus(); }, 10);
         }
 
         function closeModal() {
@@ -898,25 +1069,11 @@
             const content = document.getElementById('custom-modal-content');
             content.classList.remove('scale-100', 'opacity-100');
             content.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }, 200);
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 200);
         }
 
-        document.getElementById('custom-modal-btn-cancel').addEventListener('click', () => {
-            closeModal();
-            if(modalCallback && modalInputMode) modalCallback(null);
-            else if (modalCallback) modalCallback(false);
-        });
-
-        document.getElementById('custom-modal-btn-confirm').addEventListener('click', () => {
-            closeModal();
-            if(modalCallback) {
-                if(modalInputMode) modalCallback(document.getElementById('custom-modal-input').value);
-                else modalCallback(true);
-            }
-        });
+        document.getElementById('custom-modal-btn-cancel').addEventListener('click', () => { closeModal(); if(modalCallback && modalInputMode) modalCallback(null); else if (modalCallback) modalCallback(false); });
+        document.getElementById('custom-modal-btn-confirm').addEventListener('click', () => { closeModal(); if(modalCallback) { if(modalInputMode) modalCallback(document.getElementById('custom-modal-input').value); else modalCallback(true); } });
 
         // --- APP STATE & LOCAL STORAGE ---
         let appInventory = JSON.parse(localStorage.getItem('kurvia_inventory')) || [];
@@ -932,44 +1089,26 @@
             const tbody = document.getElementById('inv-tbody');
             if (!tbody) return;
             tbody.innerHTML = '';
-            
-            // Urutkan data berdasarkan tanggal masuk (FIFO - First In First Out)
             appInventory.sort((a, b) => new Date(a.date) - new Date(b.date));
-            
-            if (appInventory.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-slate-400 text-sm italic">Belum ada data stok yang tercatat.</td></tr>';
-                return;
-            }
+            if (appInventory.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-slate-400 text-sm italic">Belum ada data stok yang tercatat.</td></tr>'; return; }
 
             appInventory.forEach((item, index) => {
                 const dateObj = new Date(item.date);
                 const formattedDate = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
                 const daysOld = Math.floor((new Date() - dateObj) / (1000 * 60 * 60 * 24));
-                
-                // Menentukan baris prioritas konsumsi
                 const isUrgent = daysOld > 5;
-                const rowClass = isUrgent ? 'bg-amber-50/50 hover:bg-amber-50' : 'hover:bg-slate-50';
                 const badge = isUrgent ? '<span class="ml-2 text-[9px] bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">Prioritas</span>' : '';
-                const timeText = daysOld === 0 ? 'Hari ini' : (daysOld < 0 ? 'Mendatang' : `${daysOld} hari lalu`);
-
+                
                 const tr = document.createElement('tr');
-                tr.className = `border-b border-slate-100 ${rowClass} transition`;
+                tr.className = `border-b border-slate-100 ${isUrgent ? 'bg-amber-50/50 hover:bg-amber-50' : 'hover:bg-slate-50'} transition`;
                 tr.innerHTML = `
-                    <td class="py-3 px-4">
-                        <div class="font-semibold text-slate-800 flex items-center">${item.name} ${badge}</div>
-                    </td>
-                    <td class="py-3 px-4">
-                        <div class="text-slate-700 font-medium">${formattedDate}</div>
-                        <div class="text-[10px] text-slate-500">${timeText}</div>
-                    </td>
+                    <td class="py-3 px-4"><div class="font-semibold text-slate-800 flex items-center">${item.name} ${badge}</div></td>
+                    <td class="py-3 px-4"><div class="text-slate-700 font-medium">${formattedDate}</div></td>
                     <td class="py-3 px-4 text-center font-bold text-slate-700">${item.qty} <span class="text-xs font-normal text-slate-500">kg</span></td>
                     <td class="py-3 px-4 text-right">
-                        <div class="flex justify-end gap-2">
-                            <button onclick="consumeItem(${index})" class="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-bold transition">Ambil</button>
-                            <button onclick="deleteItem(${index})" class="bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-rose-600 px-2.5 py-1.5 rounded-lg text-xs transition"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </td>
-                `;
+                        <button onclick="consumeItem(${index})" class="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-bold transition">Ambil</button>
+                        <button onclick="deleteItem(${index})" class="bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-rose-600 px-2.5 py-1.5 rounded-lg text-xs transition ml-1"><i class="fa-solid fa-trash"></i></button>
+                    </td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -979,99 +1118,50 @@
             const name = document.getElementById('inv-input-name').value;
             const date = document.getElementById('inv-input-date').value;
             const qty = document.getElementById('inv-input-qty').value;
-
-            if (!name || !date || !qty) {
-                return showModal({title: 'Perhatian', desc: 'Mohon isi semua kolom untuk menambahkan stok.'});
-            }
-
+            if (!name || !date || !qty) return showModal({title: 'Perhatian', desc: 'Isi semua kolom.'});
             appInventory.push({ id: Date.now(), name, date, qty: parseFloat(qty) });
-            saveState();
-            renderInventory();
-            document.getElementById('form-inventory').reset();
+            saveState(); renderInventory(); document.getElementById('form-inventory').reset();
         }
 
         function deleteItem(index) {
-            showModal({
-                title: 'Hapus Stok',
-                desc: 'Yakin ingin menghapus item ini dari inventory secara permanen?',
-                showCancel: true,
-                type: 'danger',
-                confirmText: 'Hapus'
-            }, (confirmed) => {
-                if(confirmed) {
-                    appInventory.splice(index, 1);
-                    saveState();
-                    renderInventory();
-                }
+            showModal({ title: 'Hapus Stok', desc: 'Hapus item ini permanen?', showCancel: true, type: 'danger', confirmText: 'Hapus' }, (confirmed) => {
+                if(confirmed) { appInventory.splice(index, 1); saveState(); renderInventory(); }
             });
         }
 
         function consumeItem(index) {
             const item = appInventory[index];
-            showModal({
-                title: 'Gunakan Stok (FIFO)',
-                desc: `Berapa kg ${item.name} yang ingin diambil? (Tersedia: ${item.qty} kg)`,
-                showCancel: true,
-                isInput: true,
-                inputPlaceholder: 'Contoh: 2.5',
-                confirmText: 'Proses'
-            }, (val) => {
+            showModal({ title: 'Gunakan Stok (FIFO)', desc: `Berapa kg ${item.name} yang diambil? (Tersedia: ${item.qty} kg)`, showCancel: true, isInput: true, inputPlaceholder: 'Contoh: 2.5', confirmText: 'Proses' }, (val) => {
                 if (val === null) return;
                 const qty = parseFloat(val);
-                if (isNaN(qty) || qty <= 0) return showModal({title: 'Error', desc: 'Jumlah yang dimasukkan tidak valid.'});
-                if (qty > item.qty) return showModal({title: 'Error', desc: 'Jumlah pengambilan melebihi stok tersedia!'});
-                
-                item.qty = parseFloat((item.qty - qty).toFixed(2)); // handle floating point precision
-                if (item.qty === 0) {
-                    appInventory.splice(index, 1);
-                }
-                saveState();
-                renderInventory();
+                if (isNaN(qty) || qty <= 0) return showModal({title: 'Error', desc: 'Jumlah tidak valid.'});
+                if (qty > item.qty) return showModal({title: 'Error', desc: 'Melebihi stok!'});
+                item.qty = parseFloat((item.qty - qty).toFixed(2));
+                if (item.qty === 0) appInventory.splice(index, 1);
+                saveState(); renderInventory();
             });
         }
 
-        // --- SISTEM KALIBRASI & DOSIS SPRAY LOGIC ---
+        // --- LAB SPRAY LOGIC ---
         let userSprayVol = parseFloat(localStorage.getItem('kurvia_spray_vol')) || null;
-
         function initSpraySystem() {
             if (userSprayVol) {
-                // Populate data if exists
-                document.getElementById('dose-volspray').value = userSprayVol;
+                document.getElementById('dose-volspray').value = userSprayVol.toFixed(3);
                 document.getElementById('res-spray1').innerText = userSprayVol.toFixed(3) + ' mL';
                 document.getElementById('res-spray10').innerText = (userSprayVol * 10).toFixed(2) + ' mL';
                 document.getElementById('res-spray50').innerText = (userSprayVol * 50).toFixed(2) + ' mL';
                 document.getElementById('cal-result').classList.remove('hidden');
             }
         }
-
         function calculateCalibration(e) {
             e.preventDefault();
             const vol10 = parseFloat(document.getElementById('cal-vol10').value);
-            if (isNaN(vol10) || vol10 <= 0) return showModal({title:'Error', desc:'Massa atau volume yang dimasukkan tidak valid.'});
-            
-            // 1 gram air ≈ 1 mL air (Massa jenis = 1). Asumsi larutan kitosan mendekati massa jenis air.
+            if (isNaN(vol10) || vol10 <= 0) return showModal({title:'Error', desc:'Massa tidak valid.'});
             userSprayVol = vol10 / 10;
             localStorage.setItem('kurvia_spray_vol', userSprayVol);
-            
-            document.getElementById('res-spray1').innerText = userSprayVol.toFixed(3) + ' mL';
-            document.getElementById('res-spray10').innerText = (userSprayVol * 10).toFixed(2) + ' mL';
-            document.getElementById('res-spray50').innerText = (userSprayVol * 50).toFixed(2) + ' mL';
-            
-            document.getElementById('cal-result').classList.remove('hidden');
-            document.getElementById('dose-volspray').value = userSprayVol.toFixed(3);
-            
-            // Animasi highlight input di kalkulator
-            const inputSpray = document.getElementById('dose-volspray');
-            inputSpray.classList.add('ring-4', 'ring-[#e11d48]');
-            setTimeout(() => inputSpray.classList.remove('ring-4', 'ring-[#e11d48]'), 1500);
-
-            showModal({
-                title: 'Profil Tersimpan!', 
-                desc: `Kalibrasi berhasil. Output botol Anda adalah ${userSprayVol.toFixed(3)} mL per 1 semprotan. Data ini otomatis digunakan di Kalkulator Dosis.`,
-                type: 'success'
-            });
+            initSpraySystem();
+            showModal({ title: 'Tersimpan!', desc: `Output botol Anda ${userSprayVol.toFixed(3)} mL per semprot.`, type: 'success' });
         }
-
         function calculateSprayDose(e) {
             e.preventDefault();
             const fruitName = document.getElementById('dose-fruit').value;
@@ -1080,190 +1170,288 @@
             const diameter = parseFloat(document.getElementById('dose-diameter').value);
             const bottleVol = parseFloat(document.getElementById('dose-bottle').value);
             const volSpray = parseFloat(document.getElementById('dose-volspray').value);
-
-            if (isNaN(qty) || isNaN(diameter) || isNaN(volSpray) || volSpray <= 0) {
-                return showModal({title: 'Error', desc: 'Pastikan form terisi dengan angka yang valid dan Volume per Spray > 0.'});
-            }
-
-            // --- RUMUS BIOMETRIK SEDERHANA ---
-            // 1. Luas Permukaan Buah (Asumsi bentuk mendekati bulat/ellipsoid): Area = π × d²
+            
             const areaCm2 = Math.PI * Math.pow(diameter, 2);
-            
-            // 2. Target Coverage Factor (Ketebalan mikroskopis coating)
-            // Konstanta didapat dari hasil riset (0.00573 mL per cm²) menghasilkan ~1.8mL untuk diameter 10cm
             const COVERAGE_FACTOR = 0.00573; 
-            
-            // 3. Kalkulasi Volume dan Semprotan
             const volPerFruit = areaCm2 * COVERAGE_FACTOR;
             const totalVol = volPerFruit * qty;
-            
             const totalSpray = Math.round(totalVol / volSpray);
 
-            // --- UPDATE UI OUTPUT ---
-            // Dynamic Icon Emoji
-            let icon = "🍎";
-            const nameLower = fruitName.toLowerCase();
-            if (nameLower.includes('mangga')) icon = "🥭";
-            else if (nameLower.includes('pisang')) icon = "🍌";
-            else if (nameLower.includes('jeruk')) icon = "🍊";
-            else if (nameLower.includes('tomat')) icon = "🍅";
-            else if (nameLower.includes('stroberi')) icon = "🍓";
-            else if (nameLower.includes('alpukat')) icon = "🥑";
-
-            document.getElementById('out-icon').innerText = icon;
+            document.getElementById('out-icon').innerText = fruitName.toLowerCase().includes('mangga') ? "🥭" : "🍎";
             document.getElementById('out-fruit').innerText = fruitName;
             document.getElementById('out-summary').innerText = `Berat: ${weight} g | Ukuran: ±${diameter} cm | Vol/spray: ${volSpray} mL`;
             document.getElementById('out-qty').innerText = `${qty} Buah`;
-            
-            // Hasil Estimasi
             document.getElementById('out-vol').innerText = `±${totalVol.toFixed(1)}`;
             document.getElementById('out-spray').innerText = `±${totalSpray}`;
+            document.getElementById('out-eff').innerText = `${Math.floor(Math.random() * 5 + 92)}%`;
+            document.getElementById('out-bottle-info').innerText = (bottleVol>0) ? `Mengkonsumsi ${((totalVol/bottleVol)*100).toFixed(1)}% isi botol` : '';
             
-            // Estimasi Efisiensi (Standar asumsi semprotan presisi)
-            const efficiency = Math.floor(Math.random() * (96 - 92 + 1) + 92); 
-            document.getElementById('out-eff').innerText = `${efficiency}%`;
-
-            // Info konsumsi botol
-            if (!isNaN(bottleVol) && bottleVol > 0) {
-                const perc = (totalVol / bottleVol) * 100;
-                document.getElementById('out-bottle-info').innerText = `Mengkonsumsi ${perc.toFixed(1)}% isi botol`;
-            } else {
-                document.getElementById('out-bottle-info').innerText = '';
-            }
-
-            // Tampilkan Result dengan transisi
             const resultBox = document.getElementById('dose-result-container');
             resultBox.classList.remove('hidden');
-            resultBox.style.opacity = '0';
-            setTimeout(() => resultBox.style.opacity = '1', 50);
+            resultBox.style.opacity = '0'; setTimeout(() => resultBox.style.opacity = '1', 50);
         }
-
         function resetSprayDose() {
             document.getElementById('form-spray-dose').reset();
             if(userSprayVol) document.getElementById('dose-volspray').value = userSprayVol.toFixed(3);
             document.getElementById('dose-result-container').classList.add('hidden');
         }
 
-        // --- FOOD RESCUE LOGIC ---
+        // --- RESCUE LOGIC ---
         function renderRescue() {
             const container = document.getElementById('rescue-cards');
             if (!container) return;
             container.innerHTML = '';
-
-            if (appRescue.length === 0) {
-                container.innerHTML = '<div class="col-span-full text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-300 text-slate-500"><i class="fa-solid fa-face-smile-beam text-4xl mb-3 text-slate-300"></i><p>Belum ada makanan yang di-rescue. Luar biasa!</p></div>';
-                return;
-            }
+            if (appRescue.length === 0) { container.innerHTML = '<div class="col-span-full text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-300 text-slate-500"><i class="fa-solid fa-face-smile-beam text-4xl mb-3 text-slate-300"></i><p>Belum ada makanan yang di-rescue.</p></div>'; return; }
 
             appRescue.forEach((item, index) => {
                 const dateObj = new Date(item.date);
-                const formattedDate = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-                
-                // Algoritma rekomendasi sederhana berdasarkan nama
-                let recs = "Kompos Organik, Pakan Ternak, Bio-Enzim";
-                let icon = "fa-recycle";
-                let color = "text-amber-600";
-                let bg = "bg-amber-100";
-                
-                const lowerName = item.name.toLowerCase();
-                if (lowerName.includes('pisang') || lowerName.includes('mangga') || lowerName.includes('apel') || lowerName.includes('stroberi')) {
-                    recs = "Smoothies, Selai Buah, Bolu Pan, Manisan";
-                    icon = "fa-blender";
-                    color = "text-purple-600";
-                    bg = "bg-purple-100";
-                } else if (lowerName.includes('tomat') || lowerName.includes('cabai') || lowerName.includes('bawang')) {
-                    recs = "Saus Makanan, Sambal Kering, Kaldu Nabati";
-                    icon = "fa-pepper-hot";
-                    color = "text-red-600";
-                    bg = "bg-red-100";
-                }
-
                 const div = document.createElement('div');
                 div.className = "bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col transition hover:shadow-md";
                 div.innerHTML = `
                     <div class="flex justify-between items-start mb-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 ${bg} ${color} rounded-xl flex items-center justify-center text-xl">
-                                <i class="fa-solid ${icon}"></i>
-                            </div>
+                            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-recycle"></i></div>
                             <div>
                                 <h4 class="font-bold text-slate-800 leading-tight">${item.name}</h4>
-                                <p class="text-[11px] text-slate-500 mt-0.5">Masuk: ${formattedDate} • <b>${item.qty} kg</b></p>
+                                <p class="text-[11px] text-slate-500 mt-0.5">Masuk: ${dateObj.toLocaleDateString('id-ID')} • <b>${item.qty} kg</b></p>
                             </div>
                         </div>
                         <button onclick="deleteRescue(${index})" class="text-slate-400 hover:text-rose-500 transition p-1"><i class="fa-solid fa-trash text-sm"></i></button>
                     </div>
                     <div class="mt-auto pt-4 border-t border-slate-100">
                         <p class="text-[10px] uppercase font-bold text-slate-400 mb-1 tracking-wider">Potensi Olahan</p>
-                        <p class="text-sm font-semibold text-slate-700 leading-tight mb-4">${recs}</p>
-                        <button onclick="klaimRescue(${index})" class="w-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold py-2.5 rounded-xl text-xs transition flex justify-center items-center gap-2">
-                            <i class="fa-solid fa-check-circle"></i> Tandai Sudah Diolah
-                        </button>
-                    </div>
-                `;
+                        <p class="text-sm font-semibold text-slate-700 leading-tight mb-4">Kompos, Pakan Ternak, Bio-Enzim</p>
+                        <button onclick="klaimRescue(${index})" class="w-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold py-2.5 rounded-xl text-xs transition flex justify-center items-center gap-2"><i class="fa-solid fa-check-circle"></i> Selesai Diolah</button>
+                    </div>`;
                 container.appendChild(div);
             });
         }
-
         function addRescue(e) {
             e.preventDefault();
             const name = document.getElementById('res-input-name').value;
             const qty = document.getElementById('res-input-qty').value;
-            const date = new Date().toISOString();
-
-            if (!name || !qty) return showModal({title: 'Perhatian', desc: 'Mohon isi nama buah dan jumlah.'});
-
-            appRescue.push({ id: Date.now(), name, qty: parseFloat(qty), date });
-            saveState();
-            renderRescue();
-            document.getElementById('form-rescue').reset();
+            if (!name || !qty) return;
+            appRescue.push({ id: Date.now(), name, qty: parseFloat(qty), date: new Date().toISOString() });
+            saveState(); renderRescue(); document.getElementById('form-rescue').reset();
         }
-
         function deleteRescue(index) {
-            showModal({
-                title: 'Hapus dari Rescue',
-                desc: 'Hapus item ini dari daftar penyelamatan?',
-                showCancel: true,
-                type: 'danger',
-                confirmText: 'Hapus'
-            }, (confirmed) => {
-                if(confirmed) {
-                    appRescue.splice(index, 1);
-                    saveState();
-                    renderRescue();
-                }
+            showModal({ title: 'Hapus', desc: 'Hapus item ini?', showCancel: true, type: 'danger', confirmText: 'Hapus' }, (c) => {
+                if(c) { appRescue.splice(index, 1); saveState(); renderRescue(); }
             });
         }
-
         function klaimRescue(index) {
-            showModal({
-                title: 'Misi Berhasil!',
-                desc: 'Bagus sekali! Anda telah menyelamatkan makanan ini dari tempat sampah. Tandai sebagai selesai?',
-                showCancel: true,
-                type: 'success',
-                confirmText: 'Selesai'
-            }, (confirmed) => {
-                if(confirmed) {
-                    const statSavedKg = document.getElementById('statSavedKg');
-                    if (statSavedKg) {
-                        let currentSaved = parseFloat(statSavedKg.innerText);
-                        if (isNaN(currentSaved)) currentSaved = 0;
-                        statSavedKg.innerText = (currentSaved + appRescue[index].qty).toFixed(1) + ' kg';
-                    }
-                    appRescue.splice(index, 1);
-                    saveState();
-                    renderRescue();
+            showModal({ title: 'Berhasil!', desc: 'Tandai sebagai selesai diolah?', showCancel: true, type: 'success' }, (c) => {
+                if(c) {
+                    const stat = document.getElementById('statSavedKg');
+                    if (stat) stat.innerText = (parseFloat(stat.innerText || 0) + appRescue[index].qty).toFixed(1) + ' kg';
+                    appRescue.splice(index, 1); saveState(); renderRescue();
                 }
             });
         }
 
-        // --- Inisialisasi Fitur Baru ---
+        // --- KURVIA AI CHATBOT LOGIC ---
+        function handleAIChat(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if(!msg) return;
+            
+            appendChat('user', msg);
+            input.value = '';
+            
+            const typing = document.getElementById('ai-typing');
+            typing.classList.remove('hidden');
+            
+            const chatBox = document.getElementById('chat-box');
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Prototype Simulated Response
+            setTimeout(() => {
+                typing.classList.add('hidden');
+                let reply = "Maaf, saya belum memahami pertanyaan Anda. Silakan tanyakan tentang perubahan warna, penyemprotan kitosan, cara penyimpanan, atau kondisi pematangan buah klimaterik.";
+                const lowerMsg = msg.toLowerCase();
+                
+                if(lowerMsg.includes('warna') || lowerMsg.includes('sticker') || lowerMsg.includes('kurkumin')) {
+                    reply = "Stiker kurkumin KURVIA memiliki 3 zona: 🟡 FRESH (kuning) menunjukkan buah stabil, 🟠 CHECK (oranye) menunjukkan awal perubahan, dan 🟤 LESS FRESH (cokelat) menandakan kondisi basa/pematangan berlebih. Pastikan lingkungan tidak terlalu lembab.";
+                } else if (lowerMsg.includes('spray') || lowerMsg.includes('kitosan')) {
+                    reply = "Kitosan spray bekerja dengan membentuk lapisan mikroskopis (edible coating) yang menahan laju respirasi O2/CO2 buah. Gunakan fitur 'Kalkulator Spray' untuk mengetahui dosis persis per buah.";
+                } else if (lowerMsg.includes('busuk') || lowerMsg.includes('bercak')) {
+                    reply = "Bercak hitam/cokelat seringkali disebabkan oleh antraknosa atau benturan fisik. Segera pisahkan buah yang terindikasi busuk agar gas etilen tidak memicu kematangan buah lain di sekitarnya. Buah ini dapat dimasukkan ke modul Food Rescue.";
+                } else if (lowerMsg.includes('simpan') || lowerMsg.includes('suhu')) {
+                    reply = "Untuk buah klimaterik seperti mangga dan pisang, simpan di suhu ruang (±25°C) sebelum matang. Jangan simpan di kulkas terlalu dini karena dapat menyebabkan chilling injury (kerusakan sel akibat dingin).";
+                } else if (lowerMsg.includes('halo') || lowerMsg.includes('hai')) {
+                    reply = "Halo! Silakan konsultasikan masalah buah Anda kepada saya.";
+                }
+
+                appendChat('ai', reply);
+            }, 1200);
+        }
+
+        function appendChat(sender, text) {
+            const chatBox = document.getElementById('chat-box');
+            const div = document.createElement('div');
+            
+            if(sender === 'user') {
+                div.className = "flex gap-3 justify-end";
+                div.innerHTML = `<div class="bg-indigo-600 text-white p-3 rounded-2xl rounded-tr-none text-sm max-w-[80%] shadow-sm">${text}</div>`;
+            } else {
+                div.className = "flex gap-3";
+                div.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center text-indigo-600 text-xs"><i class="fa-solid fa-robot"></i></div>
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 text-sm text-slate-700 max-w-[80%] shadow-sm leading-relaxed">${text}</div>
+                `;
+            }
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function clearChat() {
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML = `
+                <div class="flex gap-3">
+                    <div class="w-8 h-8 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center text-indigo-600 text-xs"><i class="fa-solid fa-robot"></i></div>
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 text-sm text-slate-700 max-w-[80%] shadow-sm">
+                        Riwayat dibersihkan. Halo! Saya KURVIA AI 🤖. Ada yang bisa saya bantu?
+                    </div>
+                </div>`;
+        }
+
+        // --- FRUIT PROFILE LOGIC ---
+        const fruitData = [
+            { id: 1, name: 'Mangga', icon: '🥭', type: 'Klimaterik Tinggi', eth: 'Tinggi', storage: 'Suhu 13°C - Hindari kulkas sebelum matang.', phys: 'Kulit menguning, tekstur melunak, aroma kuat keluar dari pangkal.', kurvia: 'Gunakan spray saat kulit mulai bersih (80% matang).' },
+            { id: 2, name: 'Pisang', icon: '🍌', type: 'Klimaterik Sangat Tinggi', eth: 'Sangat Tinggi', storage: 'Suhu 14-15°C - Jangan dibungkus plastik rapat tanpa ventilasi.', phys: 'Perubahan warna hijau ke kuning, muncul sugar spots (bercak hitam manis).', kurvia: 'Spray merata di seluruh permukaan, pastikan tandan kering.' },
+            { id: 3, name: 'Pepaya', icon: '🍈', type: 'Klimaterik Sedang', eth: 'Sedang', storage: 'Suhu 10-13°C - Sensitif terhadap suhu dingin.', phys: 'Perubahan warna garis kuning/orange meluas dari ujung.', kurvia: 'Fokuskan spray pada bagian yang mulai menguning.' },
+            { id: 4, name: 'Alpukat', icon: '🥑', type: 'Klimaterik', eth: 'Tinggi', storage: 'Suhu ruang sampai matang, lalu kulkas (5°C).', phys: 'Warna kulit menggelap, terasa empuk saat ditekan lembut.', kurvia: 'Spray kitosan sangat efektif mencegah pencokelatan internal.' },
+            { id: 5, name: 'Tomat', icon: '🍅', type: 'Klimaterik', eth: 'Sedang', storage: 'Suhu ruang (15-20°C). Jauhkan dari sinar matahari langsung.', phys: 'Perubahan hijau ke merah (likopen meningkat), tekstur melunak.', kurvia: 'Stiker kurkumin merespons sangat cepat terhadap pematangan tomat.' },
+            { id: 6, name: 'Jambu Biji', icon: '🍐', type: 'Klimaterik', eth: 'Sedang', storage: 'Suhu 7-10°C untuk memperpanjang umur simpan.', phys: 'Warna hijau memudar, aroma harum, tekstur sedikit empuk.', kurvia: 'Coating kitosan menjaga ketahanan kulit yang tipis.' }
+        ];
+
+        function renderFruitProfiles() {
+            const grid = document.getElementById('fruit-grid');
+            grid.innerHTML = '';
+            fruitData.forEach(f => {
+                grid.innerHTML += `
+                    <div onclick="openFruitDetail(${f.id})" class="bg-white border border-slate-200 rounded-2xl p-5 hover:border-red-300 hover:shadow-md transition cursor-pointer flex gap-4 items-center">
+                        <div class="text-3xl bg-slate-50 w-14 h-14 rounded-xl flex items-center justify-center border border-slate-100 flex-shrink-0">${f.icon}</div>
+                        <div>
+                            <h4 class="font-bold text-slate-800">${f.name}</h4>
+                            <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-1">${f.type}</p>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function openFruitDetail(id) {
+            const f = fruitData.find(x => x.id === id);
+            if(!f) return;
+            document.getElementById('fruit-grid').classList.add('hidden');
+            const view = document.getElementById('fruit-detail-view');
+            
+            document.getElementById('fd-icon').innerText = f.icon;
+            document.getElementById('fd-name').innerText = f.name;
+            document.getElementById('fd-type').innerText = f.type;
+            document.getElementById('fd-ethylene').innerText = f.eth;
+            document.getElementById('fd-storage').innerText = f.storage;
+            document.getElementById('fd-physical').innerText = f.phys;
+            document.getElementById('fd-kurvia').innerText = f.kurvia;
+            
+            view.classList.remove('hidden');
+        }
+
+        function closeFruitDetail() {
+            document.getElementById('fruit-detail-view').classList.add('hidden');
+            document.getElementById('fruit-grid').classList.remove('hidden');
+        }
+
+        // --- KURVIA MITRA LOGIC ---
+        function renderMitra() {
+            const tbody = document.getElementById('mitra-tbody');
+            const dummyMitra = [
+                {name: 'Toko Buah Segar Abadi', loc: 'Kota Malang', kom: 'Mangga, Pisang', status: 'Aktif Uji Coba'},
+                {name: 'Kios Rejeki Agro', loc: 'Kota Batu', kom: 'Apel, Alpukat', status: 'Aktif Uji Coba'},
+                {name: 'Pasar Induk Buah', loc: 'Kota Malang', kom: 'Tomat, Pepaya', status: 'Registrasi'},
+                {name: 'Berkah Tani KWB', loc: 'Kota Batu', kom: 'Pisang, Jambu', status: 'Aktif Uji Coba'}
+            ];
+            tbody.innerHTML = '';
+            dummyMitra.forEach(m => {
+                const sColor = m.status.includes('Aktif') ? 'text-emerald-600 bg-emerald-50' : 'text-slate-500 bg-slate-50';
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
+                        <td class="py-3 px-4 font-semibold text-slate-700">${m.name}</td>
+                        <td class="py-3 px-4 text-slate-500">${m.loc}</td>
+                        <td class="py-3 px-4 text-slate-500">${m.kom}</td>
+                        <td class="py-3 px-4 text-center"><span class="px-2.5 py-1 text-[10px] uppercase font-bold rounded-md ${sColor}">${m.status}</span></td>
+                    </tr>`;
+            });
+        }
+
+        // --- KURVIA STORE LOGIC ---
+        let cartItems = 0;
+        const itemPrice = 30000;
+        function addToCart() {
+            cartItems++;
+            updateCartUI();
+        }
+        function updateCartUI() {
+            const badge = document.getElementById('cart-badge');
+            const itemsArea = document.getElementById('cart-items');
+            const totalArea = document.getElementById('cart-total-area');
+            const totalText = document.getElementById('cart-total');
+
+            badge.innerText = `${cartItems} Item`;
+            
+            if(cartItems > 0) {
+                itemsArea.innerHTML = `
+                    <div class="flex justify-between items-center w-full bg-slate-700 p-3 rounded-xl border border-slate-600 mb-2">
+                        <div class="text-left">
+                            <h4 class="text-sm font-bold text-white">Starter Pack</h4>
+                            <p class="text-[10px] text-teal-300">Rp 30.000 x ${cartItems}</p>
+                        </div>
+                        <button onclick="cartItems=0; updateCartUI()" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash text-sm"></i></button>
+                    </div>`;
+                totalArea.classList.remove('hidden');
+                totalText.innerText = `Rp ${(cartItems * itemPrice).toLocaleString('id-ID')}`;
+            } else {
+                itemsArea.innerHTML = `<i class="fa-solid fa-basket-shopping text-4xl mb-2"></i><p class="text-sm">Keranjang masih kosong</p>`;
+                totalArea.classList.add('hidden');
+            }
+        }
+        function checkout() {
+            if(cartItems === 0) return;
+            showModal({ title: 'Checkout Berhasil!', desc: `Pesanan ${cartItems} Starter Pack senilai Rp ${(cartItems * itemPrice).toLocaleString('id-ID')} telah dikonfirmasi (Prototype).`, type: 'success' });
+            cartItems = 0;
+            updateCartUI();
+        }
+
+        // --- FEEDBACK LOGIC ---
+        function setRating(val) {
+            document.getElementById('feedback-rating').value = val;
+            const stars = document.getElementById('star-rating').children;
+            for(let i=0; i<5; i++) {
+                if(i < val) {
+                    stars[i].classList.remove('text-slate-200');
+                    stars[i].classList.add('text-amber-400');
+                } else {
+                    stars[i].classList.add('text-slate-200');
+                    stars[i].classList.remove('text-amber-400');
+                }
+            }
+        }
+        function submitFeedback(e) {
+            e.preventDefault();
+            const rating = document.getElementById('feedback-rating').value;
+            if(rating === "0") return showModal({title:'Perhatian', desc:'Mohon berikan rating bintang terlebih dahulu.'});
+            showModal({ title: 'Terima Kasih!', desc: 'Feedback Anda telah tersimpan dan akan sangat membantu pengembangan KURVIA selanjutnya.', type: 'success' });
+            document.getElementById('form-feedback').reset();
+            setRating(0); // reset stars
+        }
+
+        // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
             renderInventory();
             renderRescue();
-            initSpraySystem(); // Inisialisasi data profil kalibrasi spray
+            initSpraySystem();
         });
-
     </script>
 </body>
 </html>
