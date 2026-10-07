@@ -955,6 +955,203 @@
 
         // Camera Logic
         let streamVideo = null, animationFrame = null;
+        let classificationRunning = false;
+        let classificationBusy = false;
+        let classificationLastTime = 0;
+        let classificationErrorShown = false;
+
+        function stopLiveClassification() {
+            classificationRunning = false;
+            classificationBusy = false;
+            classificationLastTime = 0;
+            classificationErrorShown = false;
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            }
+        }
+
+        function setClassificationState(state, titleText) {
+            const badge = document.getElementById('aiBadge');
+            const title = document.getElementById('aiStatusTitle');
+            if (!badge || !title) return;
+
+            if (state === 'FRESH') {
+                badge.className = 'bg-yellow-400 text-yellow-900 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide';
+                badge.textContent = 'FRESH';
+                title.className = 'font-heading font-bold text-slate-800 text-xl leading-tight';
+            } else if (state === 'CHECK') {
+                badge.className = 'bg-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide';
+                badge.textContent = 'CHECK';
+                title.className = 'font-heading font-bold text-slate-800 text-xl leading-tight';
+            } else if (state === 'LESS FRESH') {
+                badge.className = 'bg-amber-800 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide';
+                badge.textContent = 'LESS FRESH';
+                title.className = 'font-heading font-bold text-slate-800 text-xl leading-tight';
+            } else {
+                badge.className = 'bg-slate-200 text-slate-500 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide';
+                badge.textContent = 'WAITING';
+                title.className = 'font-heading font-bold text-slate-800 text-xl leading-tight';
+            }
+            title.textContent = titleText || state;
+        }
+
+        function rgbToHsv(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            const d = max - min;
+            let h = 0;
+
+            if (d !== 0) {
+                if (max === r) h = ((g - b) / d) % 6;
+                else if (max === g) h = (b - r) / d + 2;
+                else h = (r - g) / d + 4;
+                h *= 60;
+                if (h < 0) h += 360;
+            }
+
+            const s = max === 0 ? 0 : d / max;
+            return { h, s, v: max };
+        }
+
+        function classifyCameraFrame() {
+            const video = document.getElementById('liveCameraFeed');
+            const canvas = document.getElementById('liveCameraCanvas');
+            if (!video || !canvas || !streamVideo) return false;
+            if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || video.videoWidth < 2 || video.videoHeight < 2) return false;
+
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            if (!ctx) return false;
+
+            // Ambil hanya area tengah yang berada di dalam kotak fokus kamera.
+            const side = Math.max(2, Math.floor(Math.min(video.videoWidth, video.videoHeight) * 0.42));
+            const sx = Math.floor((video.videoWidth - side) / 2);
+            const sy = Math.floor((video.videoHeight - side) / 2);
+            const sampleSize = 160;
+            canvas.width = sampleSize;
+            canvas.height = sampleSize;
+            ctx.drawImage(video, sx, sy, side, side, 0, 0, sampleSize, sampleSize);
+
+            const image = ctx.getImageData(0, 0, sampleSize, sampleSize);
+            const data = image.data;
+            let sumR = 0, sumG = 0, sumB = 0, weightSum = 0;
+            let satSum = 0, valueSum = 0;
+            let validPixels = 0;
+
+            // Sampling piksel bertahap menjaga loop ringan tetapi tetap memakai frame terbaru.
+            for (let y = 8; y < sampleSize - 8; y += 4) {
+                for (let x = 8; x < sampleSize - 8; x += 4) {
+                    const i = (y * sampleSize + x) * 4;
+                    const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+                    if (a < 200) continue;
+
+                    const hsv = rgbToHsv(r, g, b);
+                    // Abaikan piksel hampir hitam/putih agar pantulan dan area kosong tidak mendominasi.
+                    if (hsv.v < 0.12 || (hsv.s < 0.08 && hsv.v > 0.92)) continue;
+
+                    const weight = Math.max(0.25, hsv.s) * (0.5 + hsv.v);
+                    sumR += r * weight;
+                    sumG += g * weight;
+                    sumB += b * weight;
+                    satSum += hsv.s * weight;
+                    valueSum += hsv.v * weight;
+                    weightSum += weight;
+                    validPixels++;
+                }
+            }
+
+            if (!weightSum || validPixels < 20) return false;
+
+            const avgR = Math.round(sumR / weightSum);
+            const avgG = Math.round(sumG / weightSum);
+            const avgB = Math.round(sumB / weightSum);
+            const avgS = satSum / weightSum;
+            const avgV = valueSum / weightSum;
+            const hsv = rgbToHsv(avgR, avgG, avgB);
+            const hue = Math.round(hsv.h);
+
+            const rgbOut = document.getElementById('valRgb');
+            const hueOut = document.getElementById('valHue');
+            const colorPreview = document.getElementById('aiColorPreview');
+            const phOut = document.getElementById('valPh');
+            const ethOut = document.getElementById('valEth');
+            const recommendation = document.getElementById('aiRecommendation');
+
+            if (rgbOut) rgbOut.textContent = `(${avgR}, ${avgG}, ${avgB})`;
+            if (hueOut) hueOut.textContent = `${hue}°`;
+            if (colorPreview) {
+                colorPreview.style.backgroundColor = `rgb(${avgR}, ${avgG}, ${avgB})`;
+                colorPreview.innerHTML = '<i class="fa-solid fa-droplet text-white text-xl drop-shadow"></i>';
+            }
+
+            // Klasifikasi mengikuti tiga zona warna indikator kurkumin yang sudah ada di website.
+            // FRESH = kuning, CHECK = jingga/transisi, LESS FRESH = amber tua/merah.
+            let status;
+            if (avgS < 0.14) {
+                // Warna sangat netral/abu-abu tidak cukup kuat untuk menyimpulkan zona.
+                status = avgV > 0.72 ? 'FRESH' : 'CHECK';
+            } else if (hue >= 35 && hue <= 75) {
+                status = 'FRESH';
+            } else if (hue > 15 && hue < 35) {
+                status = 'CHECK';
+            } else {
+                status = 'LESS FRESH';
+            }
+
+            const phValue = status === 'FRESH' ? 6.0 : (status === 'CHECK' ? 7.5 : 8.5);
+            const ethValue = status === 'FRESH' ? 'Relatif Rendah' : (status === 'CHECK' ? 'Mulai Meningkat' : 'Berpotensi Tinggi');
+            if (phOut) phOut.textContent = phValue.toFixed(1);
+            if (ethOut) ethOut.textContent = ethValue;
+
+            if (status === 'FRESH') {
+                setClassificationState('FRESH', 'Kondisi Relatif Terjaga');
+                if (recommendation) recommendation.textContent = 'Warna indikator terbaca pada zona FRESH. Kondisi relatif stabil berdasarkan frame kamera terbaru.';
+            } else if (status === 'CHECK') {
+                setClassificationState('CHECK', 'Indikasi Perubahan Lingkungan');
+                if (recommendation) recommendation.textContent = 'Warna indikator terbaca pada zona CHECK. Kondisi mulai berubah; lanjutkan monitoring.';
+            } else {
+                setClassificationState('LESS FRESH', 'Pematangan Lanjut / Overripe');
+                if (recommendation) recommendation.textContent = 'Warna indikator terbaca pada zona LESS FRESH. Periksa kondisi buah dan pertimbangkan Food Rescue.';
+            }
+
+            return true;
+        }
+
+        function startLiveClassification() {
+            stopLiveClassification();
+            classificationRunning = true;
+            classificationErrorShown = false;
+            const loop = (timestamp) => {
+                if (!classificationRunning || !streamVideo) {
+                    animationFrame = null;
+                    return;
+                }
+
+                // Batasi sekitar 5 frame analisis/detik agar browser tidak terbebani.
+                if (timestamp - classificationLastTime >= 200 && !classificationBusy) {
+                    classificationLastTime = timestamp;
+                    classificationBusy = true;
+                    try {
+                        classifyCameraFrame();
+                        classificationErrorShown = false;
+                    } catch (error) {
+                        console.error('Classification frame gagal diproses:', error);
+                        if (!classificationErrorShown) {
+                            const recommendation = document.getElementById('aiRecommendation');
+                            if (recommendation) recommendation.textContent = 'Frame kamera belum dapat diproses. Sistem akan mencoba kembali secara otomatis.';
+                            classificationErrorShown = true;
+                        }
+                    } finally {
+                        classificationBusy = false;
+                    }
+                }
+
+                animationFrame = requestAnimationFrame(loop);
+            };
+
+            animationFrame = requestAnimationFrame(loop);
+        }
 
         async function startAnalyzerCamera(mode) {
             const video = document.getElementById('liveCameraFeed');
@@ -1037,6 +1234,9 @@
 
                 await video.play();
 
+                // Kamera sudah benar-benar memiliki frame; mulai pipeline Classification live.
+                startLiveClassification();
+
                 setCameraStatus('[ KAMERA LIVE ]', 'bg-emerald-600/80');
                 if (recommendation) {
                     recommendation.textContent = 'Kamera aktif. Arahkan kotak fokus pada stiker indikator untuk membaca warna secara real-time.';
@@ -1088,6 +1288,7 @@
         }
 
         function stopAnalyzerCamera() {
+            stopLiveClassification();
             const video = document.getElementById('liveCameraFeed');
             const status = document.getElementById('camLiveStatus');
             const recommendation = document.getElementById('aiRecommendation');
