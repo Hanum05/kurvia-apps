@@ -239,7 +239,7 @@
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                             <div class="space-y-4">
                                 <div class="bg-slate-900 rounded-2xl aspect-[4/3] relative overflow-hidden flex flex-col items-center justify-center shadow-lg border-4 border-slate-800">
-                                    <video id="liveCameraFeed" autoplay playsinline class="absolute inset-0 w-full h-full object-cover"></video>
+                                    <video id="liveCameraFeed" autoplay playsinline muted class="absolute inset-0 w-full h-full object-cover"></video>
                                     <canvas id="liveCameraCanvas" class="hidden"></canvas>
                                     <div class="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
                                         <div class="absolute inset-0 shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]"></div>
@@ -955,116 +955,142 @@
 
         // Camera Logic
         let streamVideo = null, animationFrame = null;
-        let cameraRequestId = 0;
 
         async function startAnalyzerCamera(mode) {
             const video = document.getElementById('liveCameraFeed');
             const status = document.getElementById('camLiveStatus');
-            const badge = document.getElementById('aiBadge');
-            const title = document.getElementById('aiStatusTitle');
             const recommendation = document.getElementById('aiRecommendation');
-            const requestId = ++cameraRequestId;
 
-            // Stop any previously active camera before requesting another one.
-            stopAnalyzerCamera();
+            if (!video) return;
 
-            if (!video || !status) return;
+            // Hentikan stream sebelumnya sebelum membuka kamera baru.
+            if (streamVideo) {
+                streamVideo.getTracks().forEach(track => track.stop());
+                streamVideo = null;
+            }
+            video.pause();
+            video.srcObject = null;
 
-            if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                status.innerText = '[ KAMERA TIDAK DIDUKUNG ]';
-                if (badge) {
-                    badge.innerText = 'ERROR';
-                    badge.className = 'bg-rose-100 text-rose-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide';
+            const setCameraStatus = (text, className) => {
+                if (status) {
+                    status.textContent = text;
+                    status.className = `absolute top-4 left-4 z-20 ${className} text-white font-mono text-[10px] px-3 py-1.5 rounded-md backdrop-blur-sm border border-white/20 uppercase shadow-sm`;
                 }
-                if (title) title.innerText = 'Kamera tidak tersedia';
-                if (recommendation) recommendation.innerText = 'Akses kamera membutuhkan browser yang mendukung getUserMedia dan koneksi aman (HTTPS atau localhost).';
-                return;
-            }
+            };
 
-            status.innerText = '[ MEMINTA IZIN KAMERA... ]';
-            if (badge) {
-                badge.innerText = 'REQUESTING';
-                badge.className = 'bg-amber-100 text-amber-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide';
-            }
-            if (title) title.innerText = 'Meminta akses kamera...';
-            if (recommendation) recommendation.innerText = 'Silakan izinkan akses kamera pada dialog browser.';
+            setCameraStatus('[ MEMINTA AKSES KAMERA... ]', 'bg-amber-600/80');
 
             try {
-                streamVideo = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: { ideal: mode === 'environment' ? 'environment' : 'user' }
-                    },
-                    audio: false
-                });
-
-                // Ignore a late result if another camera request was made meanwhile.
-                if (requestId !== cameraRequestId) {
-                    streamVideo.getTracks().forEach(track => track.stop());
-                    return;
+                if (!window.isSecureContext && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                    throw new Error('Kamera browser memerlukan HTTPS atau localhost.');
                 }
 
-                video.srcObject = streamVideo;
-                video.muted = true;
-                video.playsInline = true;
+                if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') {
+                    throw new Error('Browser ini tidak mendukung akses kamera melalui getUserMedia().');
+                }
 
+                // Gunakan kamera yang diminta. Jika constraint ideal tidak tersedia,
+                // browser tetap boleh memilih perangkat kamera yang kompatibel.
+                const constraints = {
+                    audio: false,
+                    video: {
+                        facingMode: { ideal: mode === 'environment' ? 'environment' : 'user' },
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                };
+
+                streamVideo = await navigator.mediaDevices.getUserMedia(constraints);
+
+                // Pastikan stream benar-benar terhubung ke elemen video.
+                video.muted = true;
+                video.autoplay = true;
+                video.playsInline = true;
+                video.setAttribute('autoplay', '');
+                video.setAttribute('playsinline', '');
+                video.setAttribute('muted', '');
+                video.srcObject = streamVideo;
+
+                // Tunggu metadata agar browser mengetahui dimensi video, lalu mulai playback.
                 await new Promise((resolve, reject) => {
                     if (video.readyState >= 1) {
                         resolve();
                         return;
                     }
-                    video.addEventListener('loadedmetadata', resolve, { once: true });
-                    video.addEventListener('error', reject, { once: true });
+
+                    const onLoadedMetadata = () => {
+                        cleanup();
+                        resolve();
+                    };
+                    const onError = () => {
+                        cleanup();
+                        reject(new Error('Video kamera gagal memuat metadata.'));
+                    };
+                    const cleanup = () => {
+                        video.removeEventListener('loadedmetadata', onLoadedMetadata);
+                        video.removeEventListener('error', onError);
+                    };
+
+                    video.addEventListener('loadedmetadata', onLoadedMetadata, { once: true });
+                    video.addEventListener('error', onError, { once: true });
                 });
 
                 await video.play();
 
-                status.innerText = '[ KAMERA ONLINE ]';
-                if (badge) {
-                    badge.innerText = 'LIVE';
-                    badge.className = 'bg-emerald-100 text-emerald-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide';
+                setCameraStatus('[ KAMERA LIVE ]', 'bg-emerald-600/80');
+                if (recommendation) {
+                    recommendation.textContent = 'Kamera aktif. Arahkan kotak fokus pada stiker indikator untuk membaca warna secara real-time.';
                 }
-                if (title) title.innerText = 'Kamera aktif';
-                if (recommendation) recommendation.innerText = 'Live camera aktif. Arahkan kotak fokus pada stiker indikator kemasan.';
 
-                // If the browser/device stops the camera externally, keep the UI in sync.
-                streamVideo.getTracks().forEach(track => {
+                // Jika kamera terputus/dihentikan oleh browser atau perangkat,
+                // perbarui status tanpa merusak halaman.
+                streamVideo.getVideoTracks().forEach(track => {
                     track.addEventListener('ended', () => {
                         if (streamVideo && streamVideo.getTracks().every(t => t.readyState === 'ended')) {
-                            stopAnalyzerCamera();
+                            streamVideo = null;
+                            video.pause();
+                            video.srcObject = null;
+                            setCameraStatus('[ KAMERA OFFLINE ]', 'bg-black/60');
+                            if (recommendation) {
+                                recommendation.textContent = 'Kamera berhenti. Pilih kamera kembali untuk memulai live preview.';
+                            }
                         }
-                    }, { once: true });
+                    });
                 });
+
             } catch (error) {
-                if (requestId !== cameraRequestId) return;
+                console.error('Kamera KURVIA gagal diaktifkan:', error);
 
-                streamVideo = null;
+                if (streamVideo) {
+                    streamVideo.getTracks().forEach(track => track.stop());
+                    streamVideo = null;
+                }
+
+                video.pause();
                 video.srcObject = null;
-                status.innerText = '[ KAMERA ERROR ]';
-                if (badge) {
-                    badge.innerText = 'ERROR';
-                    badge.className = 'bg-rose-100 text-rose-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide';
-                }
-                if (title) title.innerText = 'Kamera gagal dibuka';
+                setCameraStatus('[ KAMERA ERROR ]', 'bg-rose-600/80');
 
-                let message = 'Kamera tidak dapat digunakan.';
-                if (error && error.name === 'NotAllowedError') {
-                    message = 'Izin kamera ditolak. Izinkan akses kamera melalui pengaturan izin browser lalu coba lagi.';
-                } else if (error && error.name === 'NotFoundError') {
+                let message = 'Kamera tidak dapat diakses.';
+                if (error && (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError')) {
+                    message = 'Izin kamera ditolak. Izinkan akses kamera pada pengaturan browser lalu coba lagi.';
+                } else if (error && (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError')) {
                     message = 'Kamera tidak ditemukan pada perangkat ini.';
-                } else if (error && error.name === 'NotReadableError') {
-                    message = 'Kamera sedang digunakan aplikasi atau proses lain.';
-                } else if (error && error.name === 'OverconstrainedError') {
-                    message = 'Mode kamera yang dipilih tidak tersedia pada perangkat ini.';
-                } else if (error && error.name === 'SecurityError') {
-                    message = 'Browser memblokir akses kamera karena alasan keamanan.';
+                } else if (error && (error.name === 'NotReadableError' || error.name === 'TrackStartError')) {
+                    message = 'Kamera sedang digunakan aplikasi lain atau tidak dapat dibaca oleh browser.';
+                } else if (error && error.message) {
+                    message = error.message;
                 }
 
-                if (recommendation) recommendation.innerText = message;
+                if (recommendation) {
+                    recommendation.textContent = message;
+                }
             }
         }
 
         function stopAnalyzerCamera() {
-            cameraRequestId++;
+            const video = document.getElementById('liveCameraFeed');
+            const status = document.getElementById('camLiveStatus');
+            const recommendation = document.getElementById('aiRecommendation');
 
             if (animationFrame) {
                 cancelAnimationFrame(animationFrame);
@@ -1076,21 +1102,19 @@
                 streamVideo = null;
             }
 
-            const video = document.getElementById('liveCameraFeed');
-            const status = document.getElementById('camLiveStatus');
-            const badge = document.getElementById('aiBadge');
-            const title = document.getElementById('aiStatusTitle');
-
             if (video) {
                 video.pause();
                 video.srcObject = null;
             }
-            if (status) status.innerText = '[ KAMERA OFFLINE ]';
-            if (badge) {
-                badge.innerText = 'WAITING';
-                badge.className = 'bg-slate-200 text-slate-500 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide';
+
+            if (status) {
+                status.textContent = '[ KAMERA OFFLINE ]';
+                status.className = 'absolute top-4 left-4 z-20 bg-black/60 text-white font-mono text-[10px] px-3 py-1.5 rounded-md backdrop-blur-sm border border-white/20 uppercase shadow-sm';
             }
-            if (title) title.innerText = 'Mencari Objek...';
+
+            if (recommendation) {
+                recommendation.textContent = 'Pilih kamera untuk mulai membaca indikator warna. Algoritma akan mendeteksi nilai spektrum kurkumin secara *real-time*.';
+            }
         }
 
         // Modal Logic
